@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: tensorhub
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    env_file:
+      - .env.example
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+      - ./uploads:/app/uploads
+    ports:
+      - '8000:8000'
+
+  frontend:
+    build:
+      context: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - '5173:5173'
+
+volumes:
+  postgres_data:
