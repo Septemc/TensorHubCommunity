@@ -1,0 +1,235 @@
+client:536 WebSocket connection to 'ws://129.204.62.207:8030/?token=l-226-o8odWu' failed: Error during WebSocket handshake: Unexpected response code: 200
+setupWebSocket @ client:536
+client:536 WebSocket connection to 'ws://localhost:5173/?token=l-226-o8odWu' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED
+setupWebSocket @ client:536
+client:512 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 129.204.62.207:8030/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 129.204.62.207:8030/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+(anonymous) @ client:512
+auth.ts:20  POST http://129.204.62.207:8030/api/auth/register 422 (Unprocessable Entity)
+dispatchXhrRequest @ axios.js?v=bd7759b0:1784
+xhr @ axios.js?v=bd7759b0:1649
+dispatchRequest @ axios.js?v=bd7759b0:2210
+Promise.then
+_request @ axios.js?v=bd7759b0:2428
+request @ axios.js?v=bd7759b0:2324
+httpMethod @ axios.js?v=bd7759b0:2476
+wrap @ axios.js?v=bd7759b0:8
+register @ auth.ts:20
+doRegister @ auth.ts:39
+wrappedAction @ pinia.js?v=1aafa982:5508
+store.<computed> @ pinia.js?v=1aafa982:5205
+submit @ RegisterPage.vue:43
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+emit @ chunk-X3QCHAKX.js?v=f5b29d20:6596
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:10452
+handleClick @ element-plus.js?v=0db91213:19651
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+invoker @ chunk-X3QCHAKX.js?v=f5b29d20:11487
+chunk-X3QCHAKX.js?v=f5b29d20:2204 [Vue warn]: Unhandled error during execution of component event handler 
+  at <ElButton type="primary" onClick=fn<submit> > 
+  at <ElForm label-position="top" model= {username: 'WyxGenius', password: '114514', email: '114514@WyxGenius.sm', real_name: 'WyxGenius', gender: 'girl', …} > 
+  at <ElCard> 
+  at <ElCol span=14 > 
+  at <ElRow justify="center" > 
+  at <RegisterPage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) {__v_skip: true} > > 
+  at <RouterView> 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) {__v_skip: true} > > 
+  at <RouterView> 
+  at <App>
+warn$1 @ chunk-X3QCHAKX.js?v=f5b29d20:2204
+logError @ chunk-X3QCHAKX.js?v=f5b29d20:2415
+handleError @ chunk-X3QCHAKX.js?v=f5b29d20:2407
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:2361
+Promise.catch
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2360
+emit @ chunk-X3QCHAKX.js?v=f5b29d20:6596
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:10452
+handleClick @ element-plus.js?v=0db91213:19651
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+invoker @ chunk-X3QCHAKX.js?v=f5b29d20:11487
+axios.js?v=bd7759b0:1319 Uncaught (in promise) AxiosError: Request failed with status code 422
+    at settle (axios.js?v=bd7759b0:1319:7)
+    at XMLHttpRequest.onloadend (axios.js?v=bd7759b0:1682:7)
+    at Axios.request (axios.js?v=bd7759b0:2328:41)
+    at async register (auth.ts:20:20)
+    at async submit (RegisterPage.vue:43:3)
+settle @ axios.js?v=bd7759b0:1319
+onloadend @ axios.js?v=bd7759b0:1682
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=bd7759b0:1784
+xhr @ axios.js?v=bd7759b0:1649
+dispatchRequest @ axios.js?v=bd7759b0:2210
+Promise.then
+_request @ axios.js?v=bd7759b0:2428
+request @ axios.js?v=bd7759b0:2324
+httpMethod @ axios.js?v=bd7759b0:2476
+wrap @ axios.js?v=bd7759b0:8
+register @ auth.ts:20
+doRegister @ auth.ts:39
+wrappedAction @ pinia.js?v=1aafa982:5508
+store.<computed> @ pinia.js?v=1aafa982:5205
+submit @ RegisterPage.vue:43
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+emit @ chunk-X3QCHAKX.js?v=f5b29d20:6596
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:10452
+handleClick @ element-plus.js?v=0db91213:19651
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+invoker @ chunk-X3QCHAKX.js?v=f5b29d20:11487
+auth.ts:20  POST http://129.204.62.207:8030/api/auth/register 422 (Unprocessable Entity)
+dispatchXhrRequest @ axios.js?v=bd7759b0:1784
+xhr @ axios.js?v=bd7759b0:1649
+dispatchRequest @ axios.js?v=bd7759b0:2210
+Promise.then
+_request @ axios.js?v=bd7759b0:2428
+request @ axios.js?v=bd7759b0:2324
+httpMethod @ axios.js?v=bd7759b0:2476
+wrap @ axios.js?v=bd7759b0:8
+register @ auth.ts:20
+doRegister @ auth.ts:39
+wrappedAction @ pinia.js?v=1aafa982:5508
+store.<computed> @ pinia.js?v=1aafa982:5205
+submit @ RegisterPage.vue:43
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+emit @ chunk-X3QCHAKX.js?v=f5b29d20:6596
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:10452
+handleClick @ element-plus.js?v=0db91213:19651
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+invoker @ chunk-X3QCHAKX.js?v=f5b29d20:11487
+chunk-X3QCHAKX.js?v=f5b29d20:2204 [Vue warn]: Unhandled error during execution of component event handler 
+  at <ElButton type="primary" onClick=fn<submit> > 
+  at <ElForm label-position="top" model= {username: 'WyxGenius', password: '114514', email: '2389604361@qq.com', real_name: 'WyxGenius', gender: 'girl', …} > 
+  at <ElCard> 
+  at <ElCol span=14 > 
+  at <ElRow justify="center" > 
+  at <RegisterPage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) {__v_skip: true} > > 
+  at <RouterView> 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) {__v_skip: true} > > 
+  at <RouterView> 
+  at <App>
+warn$1 @ chunk-X3QCHAKX.js?v=f5b29d20:2204
+logError @ chunk-X3QCHAKX.js?v=f5b29d20:2415
+handleError @ chunk-X3QCHAKX.js?v=f5b29d20:2407
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:2361
+Promise.catch
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2360
+emit @ chunk-X3QCHAKX.js?v=f5b29d20:6596
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:10452
+handleClick @ element-plus.js?v=0db91213:19651
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+invoker @ chunk-X3QCHAKX.js?v=f5b29d20:11487
+axios.js?v=bd7759b0:1319 Uncaught (in promise) AxiosError: Request failed with status code 422
+    at settle (axios.js?v=bd7759b0:1319:7)
+    at XMLHttpRequest.onloadend (axios.js?v=bd7759b0:1682:7)
+    at Axios.request (axios.js?v=bd7759b0:2328:41)
+    at async register (auth.ts:20:20)
+    at async submit (RegisterPage.vue:43:3)
+settle @ axios.js?v=bd7759b0:1319
+onloadend @ axios.js?v=bd7759b0:1682
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=bd7759b0:1784
+xhr @ axios.js?v=bd7759b0:1649
+dispatchRequest @ axios.js?v=bd7759b0:2210
+Promise.then
+_request @ axios.js?v=bd7759b0:2428
+request @ axios.js?v=bd7759b0:2324
+httpMethod @ axios.js?v=bd7759b0:2476
+wrap @ axios.js?v=bd7759b0:8
+register @ auth.ts:20
+doRegister @ auth.ts:39
+wrappedAction @ pinia.js?v=1aafa982:5508
+store.<computed> @ pinia.js?v=1aafa982:5205
+submit @ RegisterPage.vue:43
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+emit @ chunk-X3QCHAKX.js?v=f5b29d20:6596
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:10452
+handleClick @ element-plus.js?v=0db91213:19651
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+invoker @ chunk-X3QCHAKX.js?v=f5b29d20:11487
+auth.ts:20  POST http://129.204.62.207:8030/api/auth/register 422 (Unprocessable Entity)
+dispatchXhrRequest @ axios.js?v=bd7759b0:1784
+xhr @ axios.js?v=bd7759b0:1649
+dispatchRequest @ axios.js?v=bd7759b0:2210
+Promise.then
+_request @ axios.js?v=bd7759b0:2428
+request @ axios.js?v=bd7759b0:2324
+httpMethod @ axios.js?v=bd7759b0:2476
+wrap @ axios.js?v=bd7759b0:8
+register @ auth.ts:20
+doRegister @ auth.ts:39
+wrappedAction @ pinia.js?v=1aafa982:5508
+store.<computed> @ pinia.js?v=1aafa982:5205
+submit @ RegisterPage.vue:43
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+emit @ chunk-X3QCHAKX.js?v=f5b29d20:6596
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:10452
+handleClick @ element-plus.js?v=0db91213:19651
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+invoker @ chunk-X3QCHAKX.js?v=f5b29d20:11487
+chunk-X3QCHAKX.js?v=f5b29d20:2204 [Vue warn]: Unhandled error during execution of component event handler 
+  at <ElButton type="primary" onClick=fn<submit> > 
+  at <ElForm label-position="top" model= {username: 'WyxGenius', password: '114514', email: 'WyxGenius@outlook.com', real_name: 'WyxGenius', gender: 'girl', …} > 
+  at <ElCard> 
+  at <ElCol span=14 > 
+  at <ElRow justify="center" > 
+  at <RegisterPage onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) {__v_skip: true} > > 
+  at <RouterView> 
+  at <MainLayout onVnodeUnmounted=fn<onVnodeUnmounted> ref=Ref< Proxy(Object) {__v_skip: true} > > 
+  at <RouterView> 
+  at <App>
+warn$1 @ chunk-X3QCHAKX.js?v=f5b29d20:2204
+logError @ chunk-X3QCHAKX.js?v=f5b29d20:2415
+handleError @ chunk-X3QCHAKX.js?v=f5b29d20:2407
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:2361
+Promise.catch
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2360
+emit @ chunk-X3QCHAKX.js?v=f5b29d20:6596
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:10452
+handleClick @ element-plus.js?v=0db91213:19651
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+invoker @ chunk-X3QCHAKX.js?v=f5b29d20:11487
+axios.js?v=bd7759b0:1319 Uncaught (in promise) AxiosError: Request failed with status code 422
+    at settle (axios.js?v=bd7759b0:1319:7)
+    at XMLHttpRequest.onloadend (axios.js?v=bd7759b0:1682:7)
+    at Axios.request (axios.js?v=bd7759b0:2328:41)
+    at async register (auth.ts:20:20)
+    at async submit (RegisterPage.vue:43:3)
+settle @ axios.js?v=bd7759b0:1319
+onloadend @ axios.js?v=bd7759b0:1682
+XMLHttpRequest.send
+dispatchXhrRequest @ axios.js?v=bd7759b0:1784
+xhr @ axios.js?v=bd7759b0:1649
+dispatchRequest @ axios.js?v=bd7759b0:2210
+Promise.then
+_request @ axios.js?v=bd7759b0:2428
+request @ axios.js?v=bd7759b0:2324
+httpMethod @ axios.js?v=bd7759b0:2476
+wrap @ axios.js?v=bd7759b0:8
+register @ auth.ts:20
+doRegister @ auth.ts:39
+wrappedAction @ pinia.js?v=1aafa982:5508
+store.<computed> @ pinia.js?v=1aafa982:5205
+submit @ RegisterPage.vue:43
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+emit @ chunk-X3QCHAKX.js?v=f5b29d20:6596
+(anonymous) @ chunk-X3QCHAKX.js?v=f5b29d20:10452
+handleClick @ element-plus.js?v=0db91213:19651
+callWithErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2351
+callWithAsyncErrorHandling @ chunk-X3QCHAKX.js?v=f5b29d20:2358
+invoker @ chunk-X3QCHAKX.js?v=f5b29d20:11487
