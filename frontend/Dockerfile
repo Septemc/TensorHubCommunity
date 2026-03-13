@@ -7,4 +7,7 @@ RUN npm install
 
 COPY . .
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+RUN npm cache clean --force && \
+    find node_modules -type f -name "vite" -exec chmod +x {} \; || true
+
+CMD ["npx", "vite", "--host", "0.0.0.0", "--port", "5173"]
