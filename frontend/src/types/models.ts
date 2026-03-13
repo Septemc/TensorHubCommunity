@@ -30,6 +30,7 @@ export interface Category {
   type: string
   sort_order: number
   is_active: boolean
+  posts_count: number
 }
 
 export interface Post {

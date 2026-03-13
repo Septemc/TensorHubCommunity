@@ -1,6 +1,8 @@
+﻿from datetime import datetime
+
 from pydantic import BaseModel, EmailStr, Field
 
-from app.schemas.common import ORMModel, TimestampedSchema
+from app.schemas.common import ORMModel
 from app.schemas.role import RoleRead
 
 
@@ -27,7 +29,7 @@ class UserProfileUpdate(BaseModel):
     avatar: str | None = Field(default=None, max_length=255)
 
 
-class UserRead(TimestampedSchema):
+class UserRead(ORMModel):
     id: int
     username: str
     email: EmailStr | None = None
@@ -39,6 +41,8 @@ class UserRead(TimestampedSchema):
     status: int
     verification_status: str
     roles: list[RoleRead] = []
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
 
 class PublicUserRead(ORMModel):
@@ -55,3 +59,8 @@ class VerificationUpdate(BaseModel):
 
 class RoleAssignment(BaseModel):
     role_ids: list[int]
+
+
+class SessionResponse(BaseModel):
+    authenticated: bool
+    user: UserRead | None = None

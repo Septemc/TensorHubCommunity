@@ -24,3 +24,4 @@ class CategoryRead(ORMModel):
     type: str
     sort_order: int
     is_active: bool
+    posts_count: int = 0

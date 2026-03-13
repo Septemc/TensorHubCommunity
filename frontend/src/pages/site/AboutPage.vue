@@ -2,10 +2,10 @@
   <el-card>
     <template #header>
       <div class="section-title">
-        <span>{{ page?.title || '团队介绍' }}</span>
+        <span>{{ page?.title || '关于我们' }}</span>
       </div>
     </template>
-    <MarkdownContent :content="page?.content || '加载中...'"></MarkdownContent>
+    <MarkdownContent :content="page?.content || '这里将展示团队介绍、社区定位与发展方向。'" />
   </el-card>
 </template>
 

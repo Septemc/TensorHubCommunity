@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import desc, select
+from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -13,9 +13,25 @@ router = APIRouter()
 
 
 @router.get("", response_model=list[CategoryRead])
-async def list_categories(db: AsyncSession = Depends(get_db)) -> list[Category]:
-    result = await db.execute(select(Category).where(Category.is_active.is_(True)).order_by(Category.sort_order, Category.id))
-    return list(result.scalars().all())
+async def list_categories(db: AsyncSession = Depends(get_db)) -> list[dict]:
+    result = await db.execute(
+        select(
+            Category,
+            func.count(Post.id).label("posts_count"),
+        )
+        .outerjoin(Post, (Post.category_id == Category.id) & (Post.status == 1))
+        .where(Category.is_active.is_(True))
+        .group_by(Category.id)
+        .order_by(Category.sort_order, Category.id)
+    )
+    rows = result.all()
+    return [
+        {
+            **CategoryRead.model_validate(category).model_dump(),
+            "posts_count": posts_count,
+        }
+        for category, posts_count in rows
+    ]
 
 
 @router.get("/{category_id}/posts", response_model=list[PostRead])

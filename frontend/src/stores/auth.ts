@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
+﻿import { defineStore } from 'pinia'
 
-import { fetchProfile, login, logout, register, updateProfile } from '../api/auth'
+import { fetchSession, login, logout, register, updateProfile } from '../api/auth'
 import type { RegisterPayload } from '../api/auth'
 import type { User } from '../types/models'
 
@@ -20,7 +20,8 @@ export const useAuthStore = defineStore('auth', {
       if (this.initialized) return
       try {
         this.loading = true
-        this.user = await fetchProfile()
+        const session = await fetchSession()
+        this.user = session.user
       } catch {
         this.user = null
       } finally {

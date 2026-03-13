@@ -1,14 +1,16 @@
-<template>
-  <el-container>
+﻿<template>
+  <div class="app-shell">
     <AppHeader />
-    <el-main>
+    <main class="app-shell__main">
       <div class="page-shell">
         <RouterView />
       </div>
-    </el-main>
-  </el-container>
+    </main>
+    <MobileTabBar />
+  </div>
 </template>
 
 <script setup lang="ts">
 import AppHeader from '../components/AppHeader.vue'
+import MobileTabBar from '../components/MobileTabBar.vue'
 </script>

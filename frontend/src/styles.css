@@ -1,17 +1,28 @@
-:root {
+﻿:root {
   color-scheme: light;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #f5f7fa;
+  background: #f4f7fb;
   color: #1f2937;
+  --app-max-width: 1200px;
+  --app-mobile-nav-height: 78px;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
-  background: #f5f7fa;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.08), transparent 28%),
+    linear-gradient(180deg, #f8fbff 0%, #f4f7fb 45%, #eef2f7 100%);
+  color: #0f172a;
+}
+
+#app {
+  min-height: 100vh;
 }
 
 a {
@@ -19,30 +30,69 @@ a {
   text-decoration: none;
 }
 
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-shell__main {
+  width: 100%;
+}
+
 .page-shell {
-  max-width: 1200px;
+  width: min(100%, var(--app-max-width));
   margin: 0 auto;
-  padding: 24px 16px 40px;
+  padding: 28px 20px 48px;
 }
 
 .card-grid {
   display: grid;
-  gap: 16px;
+  gap: 20px;
 }
 
 .card-grid.two {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .section-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   margin-bottom: 16px;
+}
+
+.section-title h1,
+.section-title h2,
+.section-title h3,
+.section-title p {
+  margin: 0;
+}
+
+.el-card {
+  border: 1px solid rgba(148, 163, 184, 0.18) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06) !important;
+  overflow: hidden;
+}
+
+.el-card__header {
+  border-bottom-color: rgba(148, 163, 184, 0.14) !important;
+}
+
+.el-button {
+  border-radius: 12px !important;
 }
 
 .markdown-body {
   line-height: 1.8;
+  color: #334155;
 }
 
 .markdown-body pre {
@@ -51,4 +101,39 @@ a {
   color: #fff;
   padding: 12px;
   border-radius: 8px;
+}
+
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  .desktop-only {
+    display: none !important;
+  }
+
+  .mobile-only {
+    display: block !important;
+  }
+
+  .page-shell {
+    padding: 20px 14px calc(var(--app-mobile-nav-height) + 26px);
+  }
+
+  .card-grid {
+    gap: 14px;
+  }
+
+  .card-grid.two {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

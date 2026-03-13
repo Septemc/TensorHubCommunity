@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <el-row justify="center">
     <el-col :span="10">
       <el-card>
@@ -20,6 +20,7 @@
 <script setup lang="ts">
 import { reactive } from 'vue'
 import { ElMessage } from 'element-plus'
+import axios from 'axios'
 import { useRouter } from 'vue-router'
 
 import { useAuthStore } from '../../stores/auth'
@@ -29,8 +30,15 @@ const router = useRouter()
 const form = reactive({ identifier: '', password: '' })
 
 async function submit() {
-  await auth.doLogin(form)
-  ElMessage.success('登录成功')
-  router.push('/')
+  try {
+    await auth.doLogin(form)
+    ElMessage.success('登录成功')
+    router.push('/')
+  } catch (error) {
+    const message = axios.isAxiosError(error)
+      ? (error.response?.data?.detail ?? '登录失败，请检查后端与数据库配置')
+      : '登录失败，请稍后重试'
+    ElMessage.error(message)
+  }
 }
 </script>

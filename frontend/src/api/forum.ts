@@ -16,6 +16,11 @@ export async function fetchCategoryPosts(categoryId: number, sort = 'latest') {
   return data
 }
 
+export async function fetchUserPosts(userId: number) {
+  const { data } = await api.get<Post[]>(`/users/${userId}/posts`)
+  return data
+}
+
 export async function fetchPost(id: number) {
   const { data } = await api.get<Post>(`/posts/${id}`)
   return data
@@ -28,6 +33,16 @@ export async function fetchComments(postId: number) {
 
 export async function createPost(payload: Record<string, unknown>) {
   const { data } = await api.post<Post>('/posts', payload)
+  return data
+}
+
+export async function updatePost(postId: number, payload: Record<string, unknown>) {
+  const { data } = await api.put<Post>(`/posts/${postId}`, payload)
+  return data
+}
+
+export async function deletePost(postId: number) {
+  const { data } = await api.delete<{ message: string }>(`/posts/${postId}`)
   return data
 }
 

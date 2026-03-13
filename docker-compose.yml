@@ -1,12 +1,13 @@
-services:
+﻿services:
   db:
     image: postgres:16
+    restart: unless-stopped
     environment:
       POSTGRES_DB: tensorhub
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -14,22 +15,28 @@ services:
     build:
       context: ./backend
     env_file:
-      - .env.example
+      - .env
+    restart: unless-stopped
     depends_on:
       - db
-    volumes:
-      - ./backend:/app
-      - ./uploads:/app/uploads
     ports:
-      - '8000:8000'
+      - "8000:8000"
+    volumes:
+      - uploads:/app/uploads
 
-  frontend:
-    build:
-      context: ./frontend
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - uploads:/usr/share/nginx/html/uploads:ro
     depends_on:
       - backend
-    ports:
-      - '5173:5173'
 
 volumes:
+  uploads:
   postgres_data:

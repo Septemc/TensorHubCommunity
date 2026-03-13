@@ -17,6 +17,7 @@ const router = createRouter({
         { path: 'forum', component: () => import('../pages/forum/ForumHomePage.vue') },
         { path: 'forum/category/:id', component: () => import('../pages/forum/CategoryPage.vue') },
         { path: 'forum/post/:id', component: () => import('../pages/forum/PostDetailPage.vue') },
+        { path: 'forum/post/:id/edit', component: () => import('../pages/forum/CreatePostPage.vue'), meta: { requiresAuth: true, requiresVerified: true } },
         { path: 'forum/create', component: () => import('../pages/forum/CreatePostPage.vue'), meta: { requiresAuth: true, requiresVerified: true } },
         { path: 'user/settings', component: () => import('../pages/user/UserSettingsPage.vue'), meta: { requiresAuth: true } },
         { path: 'login', component: () => import('../pages/user/LoginPage.vue'), meta: { guestOnly: true } },

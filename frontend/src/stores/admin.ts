@@ -16,14 +16,16 @@ import {
   updateSitePage,
   updateVerification,
 } from '../api/admin'
-import type { Announcement, Category, Post, SitePage, User } from '../types/models'
+import { fetchCategories } from '../api/forum'
+import type { Announcement, Category, Post, Role, SitePage, User } from '../types/models'
 
 export const useAdminStore = defineStore('admin', {
   state: () => ({
     users: [] as User[],
-    roles: [] as any[],
+    roles: [] as Role[],
     announcements: [] as Announcement[],
     posts: [] as Post[],
+    categories: [] as Category[],
     pages: {} as Record<string, SitePage>,
   }),
   actions: {
@@ -34,6 +36,10 @@ export const useAdminStore = defineStore('admin', {
     async loadRoles() {
       this.roles = await fetchRoles()
       return this.roles
+    },
+    async loadCategories() {
+      this.categories = await fetchCategories()
+      return this.categories
     },
     async setVerification(userId: number, verificationStatus: string) {
       const user = await updateVerification(userId, verificationStatus)
@@ -46,10 +52,9 @@ export const useAdminStore = defineStore('admin', {
       return user
     },
     async saveCategory(payload: Partial<Category>) {
-      if (payload.id) {
-        return updateCategory(payload.id, payload)
-      }
-      return createCategory(payload)
+      const result = payload.id ? await updateCategory(payload.id, payload) : await createCategory(payload)
+      await this.loadCategories()
+      return result
     },
     async loadAnnouncements() {
       this.announcements = await fetchAdminAnnouncements()

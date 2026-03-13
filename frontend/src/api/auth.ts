@@ -1,4 +1,4 @@
-import api from './client'
+﻿import api from './client'
 import type { User } from '../types/models'
 
 export interface RegisterPayload {
@@ -33,6 +33,11 @@ export async function logout() {
 
 export async function fetchProfile() {
   const { data } = await api.get<User>('/auth/profile')
+  return data
+}
+
+export async function fetchSession() {
+  const { data } = await api.get<{ authenticated: boolean; user: User | null }>('/auth/session')
   return data
 }
 
