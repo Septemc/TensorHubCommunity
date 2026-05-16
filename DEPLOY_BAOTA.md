@@ -289,8 +289,17 @@ ssh root@159.65.97.63
 cd /www/wwwroot/TensorHubCommunity
 git pull
 
-# 重新构建并启动后端（数据库迁移在容器启动时自动执行）
+# 停止旧容器
+docker compose -f docker-compose.baota.yml down
+
+# 重新构建并启动（--build 会重建镜像，包含新代码）
 docker compose -f docker-compose.baota.yml up -d --build
+
+# 等待服务启动完成，查看状态
+docker compose -f docker-compose.baota.yml ps
+
+# 查看后端日志，确认迁移成功
+docker compose -f docker-compose.baota.yml logs --tail=50 backend
 ```
 
 前端也需要重新构建：

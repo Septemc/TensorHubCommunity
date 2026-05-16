@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+echo "Checking database state..."
+python check_and_stamp.py
+
 echo "Running database migrations..."
 alembic upgrade head
 
