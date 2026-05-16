@@ -7,9 +7,7 @@
           <i class="fas fa-bars"></i>
         </button>
         <router-link to="/" class="flex items-center gap-1.5 cursor-pointer">
-          <div class="w-6 h-6 bg-[#0064FF] rounded-sm flex items-center justify-center">
-            <i class="fas fa-layer-group text-white text-[10px]"></i>
-          </div>
+          <img src="/tensorhub_icon.png" alt="TensorHub" class="w-6 h-6 rounded-sm" />
           <span class="font-bold text-sm md:text-base text-gray-800 tracking-tight">TensorHub</span>
         </router-link>
       </div>
