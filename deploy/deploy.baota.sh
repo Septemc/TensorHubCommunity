@@ -159,10 +159,10 @@ fi
 # 也停止 baota 版本的旧容器
 docker compose -f docker-compose.baota.yml down 2>/dev/null || true
 
-# 检查并杀死占用 8000 端口的进程
-PORT_USER=\$(ss -tlnp | grep ':8000' | head -1)
+# 检查并杀死占用 8100 端口的进程
+PORT_USER=\$(ss -tlnp | grep ':8100' | head -1)
 if [ -n "\$PORT_USER" ]; then
-    echo "[REMOTE] 端口 8000 被占用，正在释放..."
+    echo "[REMOTE] 端口 8100 被占用，正在释放..."
     echo "\$PORT_USER"
     PID=\$(echo "\$PORT_USER" | grep -oP 'pid=\K\d+' || echo "")
     if [ -n "\$PID" ]; then
@@ -209,7 +209,7 @@ health_check() {
 
     # 检查后端 API
     info "检查后端 API..."
-    if ssh "$SERVER" "curl -sf http://127.0.0.1:8000/api/auth/session" | head -1; then
+    if ssh "$SERVER" "curl -sf http://127.0.0.1:8100/api/auth/session" | head -1; then
         info "✅ 后端 API 正常"
     else
         warn "⚠️ 后端 API 暂未响应（可能仍在启动中）"

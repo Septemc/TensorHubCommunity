@@ -208,7 +208,7 @@ nginx -t && nginx -s reload
 
 | 配置项 | 说明 |
 |--------|------|
-| `location /api/` | 反向代理到后端 `http://127.0.0.1:8000` |
+| `location /api/` | 反向代理到后端 `http://127.0.0.1:8100` |
 | `location /uploads/` | 映射到 `/www/wwwroot/TensorHubCommunity/uploads/` |
 | `location /` | SPA 回退，所有前端路由返回 `index.html` |
 | `location /assets/` | 静态资源长缓存 |
@@ -221,7 +221,7 @@ nginx -t && nginx -s reload
 ```nginx
 # 在 443 server 块中添加：
 location /api/ {
-    proxy_pass http://127.0.0.1:8000/api/;
+    proxy_pass http://127.0.0.1:8100/api/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -371,7 +371,7 @@ docker compose -f docker-compose.baota.yml ps
 nginx -t
 
 # 检查端口监听
-ss -tlnp | grep -E '80|443|8000'
+ss -tlnp | grep -E '80|443|8100'
 ```
 
 ### Q: API 返回 502 Bad Gateway
@@ -390,18 +390,18 @@ ss -tlnp | grep -E '80|443|8000'
 - 确认 `/www/wwwroot/TensorHubCommunity/uploads/` 目录存在且有权限
 - 确认 Nginx 配置中 `/uploads/` 路径正确映射
 
-### Q: 端口 8000 被占用
+### Q: 端口 8100 被占用
 
-如果出现 `Bind for 0.0.0.0:8000 failed: port is already allocated` 错误：
+如果出现 `Bind for 127.0.0.1:8100 failed: port is already allocated` 错误：
 
 ```bash
-# 方法1：停止旧版 docker-compose 服务
+# 方法1：停止所有 docker-compose 服务
 cd /www/wwwroot/TensorHubCommunity
 docker compose down          # 停止原始 docker-compose.yml 的服务
 docker compose -f docker-compose.baota.yml down  # 停止 baota 版服务
 
 # 方法2：查找并杀死占用端口的进程
-ss -tlnp | grep :8000
+ss -tlnp | grep :8100
 kill <PID>
 
 # 然后重新启动
@@ -422,7 +422,7 @@ Internet → 宝塔 Nginx (80/443)
               ├── /            → /www/wwwroot/community.tensorhub.cn (Vue SPA 前端)
               ├── /assets/      → 静态资源（长缓存）
               ├── /uploads/     → /www/wwwroot/TensorHubCommunity/uploads/
-              └── /api/        → http://127.0.0.1:8000 (Docker 后端)
+              └── /api/        → http://127.0.0.1:8100 (Docker 后端)
 
 服务器文件布局:
   /www/wwwroot/TensorHubCommunity/       ← git clone 项目（后端代码 + Docker 配置）

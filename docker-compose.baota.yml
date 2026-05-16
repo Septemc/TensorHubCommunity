@@ -33,7 +33,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:8100:8000"
     volumes:
       - uploads:/app/uploads
       # 映射上传目录到项目目录，方便 Nginx 直接提供静态文件
