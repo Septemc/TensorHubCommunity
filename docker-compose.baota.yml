@@ -1,0 +1,57 @@
+# ============================================
+# TensorHub Community - 宝塔面板部署 Docker Compose
+# 仅运行后端 + 数据库（前端由宝塔 Nginx 管理）
+# 使用方式: docker compose -f docker-compose.baota.yml up -d
+# ============================================
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_DB: tensorhub
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?请在 .env 中设置 POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - uploads:/app/uploads
+      # 映射上传目录到宝塔站点目录，方便 Nginx 直接提供静态文件
+      - /www/wwwroot/tensorhub_app/uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - internal
+      - proxy
+
+volumes:
+  postgres_data:
+  uploads:
+
+networks:
+  internal:
+  proxy:

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TensorHub | 向量实验室社区</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@300;400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --ali-blue: #0064FF;
+            --ali-bg: #F7F9FA;
+            --ali-border: #EBF0F3;
+            --ali-text-main: #252525;
+            --ali-text-sub: #5F6368;
+        }
+        body { 
+            font-family: 'PingFang SC', 'Inter', -apple-system, sans-serif;
+            background-color: var(--ali-bg);
+            color: var(--ali-text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+        /* 紧凑型滚动条 */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #DDD; border-radius: 2px; }
+
+        .sidebar-item { transition: all 0.15s; font-size: 13px; }
+        .sidebar-item:hover { background-color: #F0F2F5; color: var(--ali-blue); }
+        .sidebar-item.active { background-color: #E6F0FF; color: var(--ali-blue); border-right: 2px solid var(--ali-blue); font-weight: 500; }
+        
+        .content-card { background: #fff; border-top: 1px solid var(--ali-border); border-bottom: 1px solid var(--ali-border); }
+        @media (min-width: 768px) {
+            .content-card { border: 1px solid var(--ali-border); border-radius: 2px; }
+        }
+        .nav-shadow { box-shadow: 0 1px 3px 0 rgba(0,0,0,0.04); }
+        
+        /* 移动端悬浮组件样式 */
+        .mobile-floating-nav {
+            position: fixed;
+            bottom: 70px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 40;
+        }
+        .progress-box {
+            background: rgba(30, 41, 59, 0.95);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(8px);
+        }
+        .back-btn {
+            background: #00aeef;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden pb-16 lg:pb-0">
+
+    <!-- Header -->
+    <header class="h-12 bg-white border-b border-gray-200 flex items-center justify-between px-3 md:px-4 sticky top-0 z-50 nav-shadow">
+        <div class="flex items-center gap-3">
+            <button class="lg:hidden p-1 text-gray-500">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="flex items-center gap-1.5 cursor-pointer">
+                <div class="w-6 h-6 bg-[#0064FF] rounded-sm flex items-center justify-center">
+                    <i class="fas fa-layer-group text-white text-[10px]"></i>
+                </div>
+                <span class="font-bold text-sm md:text-base text-gray-800 tracking-tight">TensorHub</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button class="bg-[#0064FF] hover:bg-[#0052D9] text-white px-3 py-1 rounded-sm text-[12px] font-medium transition-all">
+                登录
+            </button>
+            <div class="text-[10px] border border-gray-300 rounded px-1.5 py-0.5 text-gray-500 uppercase font-bold">ZH</div>
+        </div>
+    </header>
+
+    <div class="flex max-w-[1400px] mx-auto min-h-[calc(100vh-3rem)]">
+        <!-- Sidebar -->
+        <aside class="hidden lg:block w-44 bg-white border-r border-gray-200 sticky top-12 h-[calc(100vh-3rem)] overflow-y-auto">
+            <div class="py-3">
+                <div class="px-4 mb-2">
+                    <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider text-center lg:text-left">导航</h3>
+                </div>
+                <nav class="space-y-0.5">
+                    <a href="#" class="flex items-center gap-3 px-4 py-1.5 sidebar-item active">
+                        <i class="fas fa-fire-alt text-xs w-4"></i>
+                        <span>精选话题</span>
+                    </a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-1.5 sidebar-item text-gray-600">
+                        <i class="fas fa-microchip text-xs w-4"></i>
+                        <span>模型训练</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 min-w-0 p-0 md:p-6">
+            <!-- Alert Banner (Mobile: Full Width) -->
+            <div class="bg-[#004e6d] text-white px-4 py-2 text-[12px] flex justify-between items-center border-l-4 border-cyan-400 md:rounded-sm md:my-4">
+                <span class="truncate mr-2">真诚、友善、团结、专业，共建社区。</span>
+                <a href="#" class="underline shrink-0">《准则》</a>
+            </div>
+
+            <!-- Thread Header -->
+            <div class="px-4 py-2 md:px-0 md:mb-6">
+                <div class="flex flex-wrap gap-1.5 items-center mb-2">
+                    <span class="flex items-center gap-1 text-green-600 bg-green-50 px-1.5 py-0.5 rounded-sm text-[10px] border border-green-100">搞七捻三</span>
+                    <span class="flex items-center gap-1 text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-sm text-[10px] border border-orange-100">纯水</span>
+                    <span class="flex items-center gap-1 text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-sm text-[10px] border border-purple-100">人工智能</span>
+                </div>
+                <h1 class="text-lg md:text-2xl font-bold text-gray-900 leading-snug">
+                    人类，能实现AGI吗？关于 Transformer 架构与通用智能的探讨
+                </h1>
+            </div>
+
+            <div class="flex flex-col xl:flex-row gap-4">
+                <!-- Thread List -->
+                <div class="flex-1 space-y-2 md:space-y-4">
+                    <div class="content-card p-4 md:p-5 shadow-sm relative">
+                        <!-- Post Header: Avatar and Info moved to top for Mobile -->
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="shrink-0">
+                                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm border border-indigo-200">
+                                    AY
+                                </div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex flex-col">
+                                        <span class="font-bold text-gray-800 text-[14px]">阿扬 aayang</span>
+                                        <span class="text-[11px] text-gray-400">不二之选 🍇</span>
+                                    </div>
+                                    <span class="text-[11px] text-gray-400">27 天前</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Post Body: Now uses FULL WIDTH (Red Box area) -->
+                        <div class="text-[15px] text-gray-700 leading-relaxed space-y-4">
+                            <p>这是一个很自然的疑问 —— 我看到了 Mythos 的强大，我看到了 Gemini 能直接刷满高考数学甚至 IMO，我看到了 GPT Pro 模型在几个小时内就给出了“博士论文级别的框架”。</p>
+                            
+                            <!-- Quote: Full width on mobile -->
+                            <div class="bg-gray-50 border-l-4 border-gray-300 p-3 text-[13px] text-gray-600 rounded-sm">
+                                <div class="flex items-center gap-2 mb-2 opacity-80">
+                                    <div class="w-4 h-4 bg-cyan-800 rounded-full flex-shrink-0"></div> 
+                                    <span class="font-medium truncate">LLM 无法成就 AGI</span>
+                                </div>
+                                <p>Transformer 架构目前本质上仍是概率预测模型，其所谓的'智慧'是否只是统计规律的极致体现？</p>
+                            </div>
+
+                            <p>但是，有个问题 —— AGI，通用人工智能，到底是什么？</p>
+
+                            <!-- Definition Table: Full width -->
+                            <div class="border border-gray-100 bg-white rounded-sm overflow-hidden">
+                                <div class="bg-gray-50 px-3 py-2 border-b border-gray-100 font-bold text-[12px] text-gray-700">定义详情</div>
+                                <div class="p-4 space-y-5">
+                                    <div class="space-y-1.5">
+                                        <div class="text-[#0064FF] font-bold text-[13px] flex items-center gap-2">
+                                            <span class="w-1 h-3.5 bg-[#0064FF] rounded-full"></span> 01 通用能力
+                                        </div>
+                                        <p class="text-[13px] text-gray-600 leading-relaxed">能够学习、感知和执行人类或其他动物所能完成的 <span class="bg-yellow-100 px-0.5">任何智力任务</span>。</p>
+                                    </div>
+                                    <div class="space-y-1.5 border-t pt-4 border-gray-50">
+                                        <div class="text-[#0064FF] font-bold text-[13px] flex items-center gap-2">
+                                            <span class="w-1 h-3.5 bg-[#0064FF] rounded-full"></span> 02 人类水平智慧
+                                        </div>
+                                        <p class="text-[13px] text-gray-600 leading-relaxed">在绝大多数具有经济价值的任务上匹配或超越人类表现的系统。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Post Actions -->
+                        <div class="flex items-center gap-6 mt-6 pt-4 border-t border-gray-50">
+                            <button class="text-gray-400 hover:text-[#0064FF] flex items-center gap-1.5 text-[13px]">
+                                <i class="far fa-thumbs-up"></i> 152
+                            </button>
+                            <button class="text-gray-400 hover:text-[#0064FF] flex items-center gap-1.5 text-[13px]">
+                                <i class="far fa-comment"></i> 48
+                            </button>
+                            <button class="text-gray-400 hover:text-[#0064FF] ml-auto">
+                                <i class="fas fa-share-alt text-[14px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Floating Progress -->
+    <div class="lg:hidden mobile-floating-nav">
+        <button class="back-btn shadow-lg">
+            <i class="fas fa-arrow-down text-[10px]"></i> 返回
+        </button>
+        <div class="progress-box shadow-xl text-center">
+            1 / 14
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center py-2 z-50">
+        <button class="flex flex-col items-center gap-0.5 text-[#0064FF] flex-1">
+            <i class="fas fa-home text-lg"></i>
+            <span class="text-[10px] font-medium">首页</span>
+        </button>
+        <button class="flex flex-col items-center gap-0.5 text-gray-400 flex-1">
+            <i class="fas fa-compass text-lg"></i>
+            <span class="text-[10px] font-medium">探索</span>
+        </button>
+        <div class="flex-1 flex justify-center">
+            <button class="bg-[#0064FF] w-12 h-9 rounded flex items-center justify-center shadow-md shadow-blue-200 -mt-3">
+                <i class="fas fa-plus text-white text-sm"></i>
+            </button>
+        </div>
+        <button class="flex flex-col items-center gap-0.5 text-gray-400 flex-1">
+            <i class="fas fa-bell text-lg"></i>
+            <span class="text-[10px] font-medium">消息</span>
+        </button>
+        <button class="flex flex-col items-center gap-0.5 text-gray-400 flex-1">
+            <i class="fas fa-user text-lg"></i>
+            <span class="text-[10px] font-medium">我的</span>
+        </button>
+    </nav>
+
+</body>
+</html>
