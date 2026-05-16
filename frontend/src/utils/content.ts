@@ -17,3 +17,12 @@ export function getFirstSentence(html: string): string {
   const sentence = parts.find((item) => item.trim())?.trim() || plainText
   return sentence.slice(0, 140)
 }
+
+import { marked } from 'marked'
+import DOMPurify from 'dompurify'
+
+export function renderMarkdown(content: string): string {
+  if (!content) return ''
+  const html = marked.parse(content, { async: false }) as string
+  return DOMPurify.sanitize(html)
+}

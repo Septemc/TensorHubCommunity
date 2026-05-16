@@ -1,305 +1,102 @@
 <template>
-  <div class="user-settings-page">
-    <div class="card-grid two user-settings-page__top">
-      <el-card>
-        <template #header>
-          <div class="section-title"><span>个人资料</span></div>
-        </template>
+  <div class="px-4 py-4 md:px-0 md:py-6 pb-20 lg:pb-4">
+    <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+      <i class="fas fa-cog text-[#0064FF]"></i> 个人设置
+    </h2>
 
-        <div v-if="auth.user" class="profile-summary">
-          <div class="profile-summary__top">
-            <el-avatar :size="72" :src="auth.user.avatar || undefined">
-              {{ auth.user.username.slice(0, 1).toUpperCase() }}
-            </el-avatar>
-            <div>
-              <h2>{{ auth.user.real_name || auth.user.username }}</h2>
-              <p>@{{ auth.user.username }}</p>
-              <el-tag :type="statusTagType">{{ statusLabel }}</el-tag>
-            </div>
+    <div v-if="auth.user" class="space-y-4">
+      <!-- Avatar & Username -->
+      <div class="content-card p-4 md:p-5 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-14 h-14 bg-[#0064FF] rounded-full flex items-center justify-center text-white text-lg font-bold">
+            {{ auth.user.username.slice(0, 2).toUpperCase() }}
           </div>
-
-          <div class="profile-summary__grid">
-            <div><strong>邮箱</strong><span>{{ auth.user.email || '未填写' }}</span></div>
-            <div><strong>专业</strong><span>{{ auth.user.major || '未填写' }}</span></div>
-            <div><strong>学号</strong><span>{{ auth.user.student_id || '未填写' }}</span></div>
-            <div><strong>性别</strong><span>{{ auth.user.gender || '未填写' }}</span></div>
-          </div>
-
-          <el-alert
-            v-if="auth.user.verification_status !== 'approved'"
-            title="当前账号尚未审核通过，暂时不能发帖。"
-            type="warning"
-            :closable="false"
-            show-icon
-          />
-        </div>
-      </el-card>
-
-      <el-card>
-        <template #header>
-          <div class="section-title"><span>更新资料</span></div>
-        </template>
-
-        <el-form label-position="top" :model="form" class="profile-form">
-          <el-form-item label="邮箱"><el-input v-model="form.email" /></el-form-item>
-          <el-form-item label="专业"><el-input v-model="form.major" /></el-form-item>
-          <el-form-item label="性别"><el-input v-model="form.gender" /></el-form-item>
-          <el-form-item label="真实姓名"><el-input v-model="form.real_name" /></el-form-item>
-          <el-form-item label="头像上传">
-            <input type="file" accept="image/*" @change="onFileChange" />
-          </el-form-item>
-          <el-button type="primary" :loading="savingProfile" @click="submitProfile">保存资料</el-button>
-        </el-form>
-      </el-card>
-    </div>
-
-    <el-card>
-      <template #header>
-        <div class="section-title user-settings-page__posts-header">
           <div>
-            <span>我的帖子</span>
-            <p>{{ myPosts.length }} 篇内容，可直接修改或删除</p>
+            <div class="font-bold text-gray-900">{{ auth.user.username }}</div>
+            <div class="text-[12px] text-gray-400 flex items-center gap-1">
+              <template v-for="role in auth.user.roles" :key="role.id">
+                <span class="px-1.5 py-0.5 rounded-sm text-[10px]" :style="{ color: role.color || '#5F6368', backgroundColor: (role.color || '#5F6368') + '15' }">{{ role.display_name }}</span>
+              </template>
+            </div>
+            <div class="text-[11px] text-gray-400 mt-0.5">
+              {{ auth.user.verification_status === 'approved' ? '✓ 已认证' : auth.user.verification_status === 'pending' ? '⏳ 待审核' : '未认证' }}
+            </div>
           </div>
-          <el-button type="primary" plain @click="router.push('/forum/create')">新建帖子</el-button>
         </div>
-      </template>
 
-      <el-empty v-if="!myPosts.length" description="你还没有发布帖子" />
-      <div v-else class="user-post-list">
-        <div v-for="post in myPosts" :key="post.id" class="user-post-card">
-          <div class="user-post-card__head">
-            <div>
-              <RouterLink :to="`/forum/post/${post.id}`" class="user-post-card__title">{{ post.title }}</RouterLink>
-              <div class="user-post-card__meta">
-                <span>点赞 {{ post.likes_count }}</span>
-                <span>评论 {{ post.comments_count }}</span>
-                <span>浏览 {{ post.views }}</span>
-                <span>{{ formatDate(post.updated_at || post.created_at) }}</span>
-              </div>
-            </div>
-            <div class="user-post-card__actions">
-              <el-button plain @click="router.push(`/forum/post/${post.id}/edit`)">编辑</el-button>
-              <el-button type="danger" plain :loading="deletingId === post.id" @click="openDelete(post.id)">删除</el-button>
-            </div>
-          </div>
-          <p class="user-post-card__excerpt">{{ getFirstSentence(post.content) }}</p>
+        <div class="grid grid-cols-2 gap-2 text-[13px] text-gray-600">
+          <div>邮箱：{{ auth.user.email || '未设置' }}</div>
+          <div>专业：{{ auth.user.major || '未设置' }}</div>
+          <div>学号：{{ auth.user.student_id || '未设置' }}</div>
+          <div>性别：{{ genderMap[auth.user.gender || ''] || '未设置' }}</div>
         </div>
       </div>
-    </el-card>
 
-    <ForumConfirmDialog
-      v-model="deleteVisible"
-      title="删除帖子"
-      message="删除后不可恢复，确认继续吗？"
-      confirm-text="确认删除"
-      @confirm="removePost"
-    />
+      <!-- Edit Form -->
+      <div class="content-card p-4 md:p-5 shadow-sm">
+        <h3 class="font-bold text-[14px] text-gray-800 mb-3">编辑资料</h3>
+        <form @submit.prevent="saveProfile" class="space-y-3">
+          <div>
+            <label class="block text-[13px] font-medium text-gray-600 mb-1">真实姓名</label>
+            <input v-model="form.real_name" type="text"
+              class="w-full px-3 py-2 border border-gray-200 rounded-sm text-[14px] focus:outline-none focus:border-[#0064FF]" />
+          </div>
+          <div>
+            <label class="block text-[13px] font-medium text-gray-600 mb-1">邮箱</label>
+            <input v-model="form.email" type="email"
+              class="w-full px-3 py-2 border border-gray-200 rounded-sm text-[14px] focus:outline-none focus:border-[#0064FF]" />
+          </div>
+          <div>
+            <label class="block text-[13px] font-medium text-gray-600 mb-1">专业</label>
+            <input v-model="form.major" type="text"
+              class="w-full px-3 py-2 border border-gray-200 rounded-sm text-[14px] focus:outline-none focus:border-[#0064FF]" />
+          </div>
+          <button type="submit" :disabled="saving"
+            class="bg-[#0064FF] hover:bg-[#0052D9] text-white px-4 py-1.5 rounded-sm text-[13px] font-medium disabled:opacity-50">
+            {{ saving ? '保存中...' : '保存' }}
+          </button>
+          <span v-if="saved" class="text-green-600 text-[13px] ml-2">✓ 已保存</span>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
-import { computed, onMounted, reactive, ref, watchEffect } from 'vue'
-import { ElMessage } from 'element-plus'
-import { useRouter } from 'vue-router'
-
-import { uploadImage } from '../../api/admin'
-import ForumConfirmDialog from '../../components/ForumConfirmDialog.vue'
+import { reactive, ref, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
-import { useForumStore } from '../../stores/forum'
-import { getFirstSentence } from '../../utils/content'
 
 const auth = useAuthStore()
-const forum = useForumStore()
-const router = useRouter()
+const saving = ref(false)
+const saved = ref(false)
+
+const genderMap: Record<string, string> = { male: '男', female: '女', other: '其他' }
 
 const form = reactive({
+  real_name: '',
   email: '',
   major: '',
-  gender: '',
-  real_name: '',
-  avatar: '',
 })
 
-const savingProfile = ref(false)
-const deletingId = ref<number | null>(null)
-const pendingDeleteId = ref<number | null>(null)
-const deleteVisible = ref(false)
-const myPosts = computed(() => forum.userPosts)
-const statusLabel = computed(() => {
-  const map = {
-    pending: '待审核',
-    approved: '已审核通过',
-    rejected: '已驳回',
-  }
-  return map[auth.user?.verification_status || 'pending']
-})
-const statusTagType = computed(() => {
-  if (auth.user?.verification_status === 'approved') return 'success'
-  if (auth.user?.verification_status === 'rejected') return 'danger'
-  return 'warning'
-})
-
-watchEffect(() => {
-  form.email = auth.user?.email || ''
-  form.major = auth.user?.major || ''
-  form.gender = auth.user?.gender || ''
-  form.real_name = auth.user?.real_name || ''
-  form.avatar = auth.user?.avatar || ''
-})
-
-async function loadMyPosts() {
+onMounted(() => {
   if (auth.user) {
-    await forum.loadUserPosts(auth.user.id)
+    form.real_name = auth.user.real_name || ''
+    form.email = auth.user.email || ''
+    form.major = auth.user.major || ''
   }
-}
+})
 
-async function onFileChange(event: Event) {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (!file) return
-  const result = await uploadImage(file)
-  form.avatar = result.url
-}
-
-async function submitProfile() {
+async function saveProfile() {
+  saving.value = true
+  saved.value = false
   try {
-    savingProfile.value = true
     await auth.saveProfile(form)
-    ElMessage.success('资料已更新')
+    saved.value = true
+    setTimeout(() => { saved.value = false }, 2000)
+  } catch {
+    // ignore
   } finally {
-    savingProfile.value = false
+    saving.value = false
   }
 }
-
-function openDelete(postId: number) {
-  pendingDeleteId.value = postId
-  deleteVisible.value = true
-}
-
-async function removePost() {
-  if (!pendingDeleteId.value) return
-  try {
-    deletingId.value = pendingDeleteId.value
-    await forum.removePost(pendingDeleteId.value)
-    ElMessage.success('帖子已删除')
-  } catch (error) {
-    const message = axios.isAxiosError(error)
-      ? (error.response?.data?.detail ?? '删除失败')
-      : '删除失败'
-    ElMessage.error(message)
-  } finally {
-    deletingId.value = null
-    pendingDeleteId.value = null
-  }
-}
-
-function formatDate(value?: string | null) {
-  if (!value) return '刚刚'
-  return new Date(value).toLocaleString('zh-CN', { hour12: false })
-}
-
-onMounted(loadMyPosts)
 </script>
-
-<style scoped>
-.user-settings-page {
-  display: grid;
-  gap: 20px;
-}
-
-.profile-summary {
-  display: grid;
-  gap: 20px;
-}
-
-.profile-summary__top,
-.user-settings-page__posts-header,
-.user-post-card__head,
-.user-post-card__actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.profile-summary__top h2 {
-  margin: 0 0 8px;
-  font-size: 28px;
-}
-
-.profile-summary__top p {
-  margin: 0 0 10px;
-  color: #64748b;
-}
-
-.profile-summary__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.profile-summary__grid div,
-.user-post-card {
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: #f8fafc;
-  border: 1px solid rgba(148, 163, 184, 0.14);
-}
-
-.profile-summary__grid strong {
-  display: block;
-  margin-bottom: 8px;
-  color: #0f172a;
-}
-
-.profile-summary__grid span,
-.user-post-card__meta,
-.user-post-card__excerpt,
-.user-settings-page__posts-header p {
-  color: #64748b;
-}
-
-.profile-form {
-  display: grid;
-  gap: 4px;
-}
-
-.user-post-list {
-  display: grid;
-  gap: 14px;
-}
-
-.user-post-card__title {
-  font-size: 20px;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.user-post-card__meta {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 13px;
-}
-
-.user-post-card__excerpt {
-  margin: 14px 0 0;
-  line-height: 1.7;
-}
-
-@media (max-width: 960px) {
-  .profile-summary__top,
-  .user-settings-page__posts-header,
-  .user-post-card__head,
-  .user-post-card__actions {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .profile-summary__grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

@@ -1,456 +1,194 @@
 <template>
-  <div class="post-detail">
-    <el-card v-if="post" class="post-detail__hero">
-      <div class="post-detail__hero-top">
-        <div class="post-detail__badges">
-          <span v-if="post.is_top" class="forum-pill forum-pill--top">置顶</span>
-          <span v-if="post.is_essence" class="forum-pill forum-pill--essence">精华</span>
-          <span class="post-detail__type">{{ postTypeLabel(post.post_type) }}</span>
+  <div class="overflow-x-hidden pb-16 lg:pb-0">
+    <div v-if="loading" class="text-center py-12 text-gray-400"><i class="fas fa-spinner fa-spin text-2xl"></i></div>
+
+    <template v-else-if="post">
+      <!-- Header Info -->
+      <div class="px-4 py-2 md:px-0 md:mb-4">
+        <div class="flex items-center gap-2 mb-2">
+          <router-link to="/forum" class="text-[#0064FF] text-[13px]"><i class="fas fa-arrow-left mr-1"></i>返回</router-link>
         </div>
-        <div class="post-detail__toolbar">
-          <el-button plain @click="router.push('/forum')">返回论坛</el-button>
-          <div v-if="canManagePost" class="post-detail__menu-wrap">
-            <button type="button" class="post-detail__menu-trigger" @click="menuOpen = !menuOpen">⋯</button>
-            <div v-if="menuOpen" class="post-detail__menu-panel">
-              <button type="button" @click="goEdit">编辑</button>
-              <button type="button" class="is-danger" @click="openDeleteConfirm">删除</button>
-            </div>
-          </div>
+        <div class="flex flex-wrap gap-1.5 items-center mb-2">
+          <router-link :to="`/forum/category/${post.category_id}`" class="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-sm border"
+            :class="categoryColor">{{ categoryName }}</router-link>
+          <span v-if="post.is_top" class="text-[10px] px-1.5 py-0.5 rounded-sm bg-red-50 text-red-600 border border-red-100">置顶</span>
+          <span v-if="post.is_essence" class="text-[10px] px-1.5 py-0.5 rounded-sm bg-yellow-50 text-yellow-600 border border-yellow-100">精华</span>
         </div>
+        <h1 class="text-lg md:text-2xl font-bold text-gray-900 leading-snug">{{ post.title }}</h1>
       </div>
 
-      <div class="post-detail__title-row">
-        <div>
-          <h1>{{ post.title }}</h1>
-          <div class="post-detail__meta">
-            <span>作者 {{ post.author.username }}</span>
-            <span>浏览 {{ post.views }}</span>
-            <span>评论 {{ post.comments_count }}</span>
-            <span>{{ formatDate(post.created_at) }}</span>
-          </div>
-        </div>
-        <RoleTag :user="post.author" />
-      </div>
-
-      <div v-if="post.extra_data && Object.keys(post.extra_data).length" class="post-detail__extra">
-        <div class="post-detail__extra-title">附加信息</div>
-        <pre>{{ JSON.stringify(post.extra_data, null, 2) }}</pre>
-      </div>
-
-      <div class="post-detail__content">
-        <MarkdownContent :content="post.content" />
-      </div>
-
-      <div class="post-detail__content-footer">
-        <el-button type="primary" plain @click="likePost">点赞 {{ post.likes_count }}</el-button>
-      </div>
-    </el-card>
-
-    <el-card class="post-detail__comments">
-      <template #header>
-        <div class="section-title post-detail__comment-header">
-          <div>
-            <span class="post-detail__comment-title">评论区</span>
-            <p class="post-detail__comment-subtitle">{{ comments.length }} 条互动内容</p>
-          </div>
-          <div class="post-detail__comment-tools">
-            <span v-if="replyTarget">正在回复 {{ replyTarget.author.username }}</span>
-            <el-button v-if="replyTarget" text @click="clearReply">取消回复</el-button>
-          </div>
-        </div>
-      </template>
-
-      <el-empty v-if="!comments.length" description="还没有评论，来抢个沙发吧" />
-      <div v-else class="post-detail__comment-list">
-        <div v-for="comment in comments" :key="comment.id" class="post-comment-card">
-          <div class="post-comment-card__header">
-            <div>
-              <strong>{{ comment.author.username }}</strong>
-              <div class="post-comment-card__meta">
-                <span>{{ formatDate(comment.created_at) }}</span>
-                <span>点赞 {{ comment.likes_count }}</span>
-                <span v-if="comment.parent_id">回复评论 #{{ comment.parent_id }}</span>
+      <div class="flex flex-col xl:flex-row gap-4">
+        <!-- Post Content -->
+        <div class="flex-1 space-y-2 md:space-y-4">
+          <div class="content-card p-4 md:p-5 shadow-sm relative">
+            <!-- Author Header -->
+            <div class="flex items-center gap-3 mb-4">
+              <div class="shrink-0">
+                <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-sm border border-indigo-200">
+                  {{ post.author?.username?.slice(0, 2).toUpperCase() || 'U' }}
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-center">
+                  <div class="flex flex-col">
+                    <span class="font-bold text-gray-800 text-[14px]">{{ post.author?.username }}</span>
+                    <span class="text-[11px] text-gray-400">{{ timeAgo(post.created_at) }}</span>
+                  </div>
+                  <span class="text-[11px] text-gray-400">{{ post.views }} 浏览</span>
+                </div>
               </div>
             </div>
-            <div class="post-comment-card__header-actions">
-              <RoleTag :user="comment.author" />
-              <el-button v-if="auth.isAuthenticated" text @click="setReply(comment)">回复</el-button>
+
+            <!-- Post Body -->
+            <div class="markdown-body text-[15px] text-gray-700 leading-relaxed" v-html="renderedContent"></div>
+
+            <!-- Post Actions -->
+            <div class="flex items-center gap-6 mt-6 pt-4 border-t border-gray-50">
+              <button @click="toggleLike" class="flex items-center gap-1.5 text-[13px] transition-colors"
+                :class="post.is_liked ? 'text-[#0064FF]' : 'text-gray-400 hover:text-[#0064FF]'">
+                <i :class="post.is_liked ? 'fas fa-thumbs-up' : 'far fa-thumbs-up'"></i> {{ post.likes_count }}
+              </button>
+              <span class="flex items-center gap-1.5 text-gray-400 text-[13px]"><i class="far fa-comment"></i> {{ comments.length }}</span>
+              <button v-if="isAuthor" @click="handleDelete" class="text-gray-400 hover:text-red-500 ml-auto text-[13px]">
+                <i class="fas fa-trash-alt"></i>
+              </button>
             </div>
           </div>
-          <div class="post-comment-card__content">
-            <MarkdownContent :content="comment.content" />
+
+          <!-- Comments Section -->
+          <div class="content-card p-4 md:p-5 shadow-sm">
+            <h3 class="font-bold text-[14px] text-gray-800 mb-4">评论 ({{ comments.length }})</h3>
+
+            <!-- Comment Input -->
+            <div v-if="auth.isAuthenticated" class="mb-4">
+              <textarea v-model="commentContent" rows="3" placeholder="写下你的评论..."
+                class="w-full px-3 py-2 border border-gray-200 rounded-sm text-[14px] resize-none focus:outline-none focus:border-[#0064FF] transition-colors"></textarea>
+              <div class="flex justify-end mt-2">
+                <button @click="submitComment" :disabled="submittingComment || !commentContent.trim()"
+                  class="bg-[#0064FF] hover:bg-[#0052D9] text-white px-3 py-1 rounded-sm text-[12px] font-medium disabled:opacity-50 transition-all">
+                  {{ submittingComment ? '发送中...' : '发表评论' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Comments List -->
+            <div v-if="comments.length" class="space-y-4">
+              <div v-for="comment in comments" :key="comment.id" class="border-b border-gray-50 pb-4 last:border-b-0">
+                <div class="flex items-center gap-2 mb-2">
+                  <div class="w-7 h-7 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-[10px] border border-indigo-200">
+                    {{ comment.author?.username?.slice(0, 2).toUpperCase() || 'U' }}
+                  </div>
+                  <span class="font-medium text-[13px] text-gray-800">{{ comment.author?.username }}</span>
+                  <span class="text-[11px] text-gray-400 ml-auto">{{ timeAgo(comment.created_at) }}</span>
+                </div>
+                <div class="text-[13px] text-gray-700 pl-9 markdown-body" v-html="renderMarkdown(comment.content)"></div>
+              </div>
+            </div>
+            <div v-else class="text-center py-6 text-gray-400 text-[13px]">暂无评论</div>
           </div>
         </div>
       </div>
+    </template>
 
-      <el-form v-if="auth.isAuthenticated" class="post-detail__comment-form" @submit.prevent="submitComment">
-        <el-form-item>
-          <el-input
-            v-model="commentContent"
-            type="textarea"
-            :rows="5"
-            maxlength="1000"
-            show-word-limit
-            placeholder="输入你的评论内容，友好交流更受欢迎。"
-          />
-        </el-form-item>
-        <div class="post-detail__comment-actions">
-          <span class="post-detail__comment-tip">
-            {{ replyTarget ? `将作为对 ${replyTarget.author.username} 的回复发布` : '支持 Markdown，建议用短段落和列表提升可读性' }}
-          </span>
-          <el-button type="primary" :loading="submittingComment" @click="submitComment">发表评论</el-button>
-        </div>
-      </el-form>
-      <el-empty v-else description="登录后参与讨论" />
-    </el-card>
-
-    <ForumConfirmDialog
-      v-model="deleteConfirmVisible"
-      title="删除帖子"
-      message="删除后帖子无法恢复，评论内容也将不再显示。确认继续吗？"
-      confirm-text="确认删除"
-      @confirm="confirmDelete"
-    />
+    <!-- Post Not Found -->
+    <div v-else class="text-center py-12 text-gray-400">
+      <i class="fas fa-exclamation-circle text-4xl mb-3"></i>
+      <p>帖子不存在或已被删除</p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
-import { computed, onMounted, ref, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-
-import ForumConfirmDialog from '../../components/ForumConfirmDialog.vue'
-import MarkdownContent from '../../components/MarkdownContent.vue'
-import RoleTag from '../../components/RoleTag.vue'
+import { fetchPost, fetchComments, createComment, togglePostLike, deletePost } from '../../api/forum'
+import { fetchCategories } from '../../api/forum'
 import { useAuthStore } from '../../stores/auth'
-import { useForumStore } from '../../stores/forum'
-import type { Comment } from '../../types/models'
+import { renderMarkdown } from '../../utils/content'
+import type { Post, Comment as CommentType, Category } from '../../types/models'
 
 const route = useRoute()
 const router = useRouter()
-const forum = useForumStore()
 const auth = useAuthStore()
 
+const post = ref<Post | null>(null)
+const comments = ref<CommentType[]>([])
+const categories = ref<Category[]>([])
+const loading = ref(true)
 const commentContent = ref('')
-const replyTarget = ref<Comment | null>(null)
-const deleting = ref(false)
 const submittingComment = ref(false)
-const menuOpen = ref(false)
-const deleteConfirmVisible = ref(false)
 
-const post = computed(() => forum.currentPost)
-const comments = computed(() => forum.comments)
-const canManagePost = computed(() => {
-  if (!post.value || !auth.user) return false
-  return auth.user.id === post.value.user_id || auth.isAdmin
+const isAuthor = computed(() => auth.user?.id === post.value?.user_id)
+
+const categoryName = computed(() => {
+  const cat = categories.value.find(c => c.id === post.value?.category_id)
+  return cat?.name || '话题'
 })
 
-async function loadPost() {
-  await forum.loadPost(Number(route.params.id))
-  commentContent.value = ''
-  replyTarget.value = null
-  menuOpen.value = false
+const categoryColor = computed(() => {
+  const type = categories.value.find(c => c.id === post.value?.category_id)?.type || 'forum'
+  const s: Record<string, string> = {
+    forum: 'text-green-600 bg-green-50 border-green-100',
+    contest: 'text-orange-600 bg-orange-50 border-orange-100',
+    recruit_project: 'text-blue-600 bg-blue-50 border-blue-100',
+    recruit_team: 'text-purple-600 bg-purple-50 border-purple-100',
+    notice: 'text-red-600 bg-red-50 border-red-100',
+  }
+  return s[type] || 'text-gray-600 bg-gray-50 border-gray-100'
+})
+
+const renderedContent = computed(() => {
+  if (!post.value) return ''
+  return renderMarkdown(post.value.content)
+})
+
+function timeAgo(date?: string) {
+  if (!date) return ''
+  const diff = Date.now() - new Date(date).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 60) return `${mins} 分钟前`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours} 小时前`
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `${days} 天前`
+  return new Date(date).toLocaleDateString()
 }
 
-function setReply(comment: Comment) {
-  replyTarget.value = comment
-}
-
-function clearReply() {
-  replyTarget.value = null
-}
-
-function goEdit() {
-  if (!post.value) return
-  menuOpen.value = false
-  router.push(`/forum/post/${post.value.id}/edit`)
-}
-
-function openDeleteConfirm() {
-  menuOpen.value = false
-  deleteConfirmVisible.value = true
-}
-
-async function confirmDelete() {
+async function toggleLike() {
   if (!post.value) return
   try {
-    deleting.value = true
-    await forum.removePost(post.value.id)
-    ElMessage.success('帖子已删除')
-    router.push('/forum')
-  } catch (error) {
-    const message = axios.isAxiosError(error)
-      ? (error.response?.data?.detail ?? '删除失败')
-      : '删除失败'
-    ElMessage.error(message)
-  } finally {
-    deleting.value = false
-  }
+    const res = await togglePostLike(post.value.id)
+    post.value.is_liked = res.liked
+    post.value.likes_count = res.likes_count
+  } catch { /* ignore */ }
 }
 
 async function submitComment() {
-  if (!commentContent.value.trim() || !post.value) return
+  if (!post.value || !commentContent.value.trim()) return
+  submittingComment.value = true
   try {
-    submittingComment.value = true
-    await forum.submitComment(post.value.id, { content: commentContent.value.trim(), parent_id: replyTarget.value?.id })
+    const newComment = await createComment(post.value.id, { content: commentContent.value })
+    comments.value.push(newComment)
     commentContent.value = ''
-    replyTarget.value = null
-    ElMessage.success('评论已发布')
-  } catch (error) {
-    const message = axios.isAxiosError(error)
-      ? (error.response?.data?.detail ?? '评论发布失败')
-      : '评论发布失败'
-    ElMessage.error(message)
-  } finally {
-    submittingComment.value = false
-  }
+  } catch { /* ignore */ } finally { submittingComment.value = false }
 }
 
-async function likePost() {
+async function handleDelete() {
   if (!post.value) return
-  await forum.likePost(post.value.id)
-  ElMessage.success('已更新点赞状态')
+  if (!confirm('确定要删除此帖？')) return
+  try {
+    await deletePost(post.value.id)
+    router.push('/forum')
+  } catch { /* ignore */ }
 }
 
-function formatDate(value?: string | null) {
-  if (!value) return '刚刚'
-  return new Date(value).toLocaleString('zh-CN', { hour12: false })
-}
-
-function postTypeLabel(type: string) {
-  const map: Record<string, string> = {
-    general: '普通帖',
-    contest: '竞赛资讯',
-    recruit_project: '项目招募',
-    recruit_team: '组队招募',
-    notice: '公告帖',
-  }
-  return map[type] || '帖子'
-}
-
-watch(() => route.params.id, loadPost)
-onMounted(loadPost)
+onMounted(async () => {
+  const postId = Number(route.params.id)
+  try {
+    const [p, c, cats] = await Promise.all([fetchPost(postId), fetchComments(postId), fetchCategories()])
+    post.value = p
+    comments.value = c
+    categories.value = cats
+  } catch { /* ignore */ } finally { loading.value = false }
+})
 </script>
-
-<style scoped>
-.post-detail {
-  display: grid;
-  gap: 20px;
-}
-
-.post-detail__hero {
-  background:
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 26%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.94));
-}
-
-.post-detail__hero-top,
-.post-detail__title-row,
-.post-comment-card__header,
-.post-detail__comment-actions,
-.post-detail__comment-header,
-.post-detail__toolbar,
-.post-detail__content-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.post-detail__badges,
-.post-comment-card__header-actions,
-.post-detail__comment-tools {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.post-detail__type,
-.forum-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.post-detail__type {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.forum-pill--top {
-  background: #dbeafe;
-  color: #2563eb;
-}
-
-.forum-pill--essence {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.post-detail__menu-wrap {
-  position: relative;
-}
-
-.post-detail__menu-trigger {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: #fff;
-  font-size: 24px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.post-detail__menu-panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  min-width: 132px;
-  padding: 8px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
-}
-
-.post-detail__menu-panel button {
-  width: 100%;
-  min-height: 40px;
-  border: none;
-  background: transparent;
-  text-align: left;
-  border-radius: 12px;
-  padding: 0 12px;
-  color: #0f172a;
-  cursor: pointer;
-}
-
-.post-detail__menu-panel button:hover {
-  background: #f8fafc;
-}
-
-.post-detail__menu-panel button.is-danger {
-  color: #dc2626;
-}
-
-.post-detail__title-row {
-  margin-top: 20px;
-  align-items: flex-start;
-}
-
-.post-detail__title-row h1 {
-  margin: 0;
-  font-size: clamp(28px, 4vw, 42px);
-  line-height: 1.15;
-}
-
-.post-detail__meta {
-  margin-top: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  color: #64748b;
-  font-size: 14px;
-}
-
-.post-detail__extra {
-  margin-top: 20px;
-  padding: 18px;
-  border-radius: 18px;
-  background: rgba(248, 250, 252, 0.88);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-}
-
-.post-detail__extra-title {
-  margin-bottom: 10px;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.post-detail__extra pre {
-  margin: 0;
-  white-space: pre-wrap;
-  color: #475569;
-}
-
-.post-detail__content {
-  margin-top: 22px;
-  padding-top: 22px;
-  border-top: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-.post-detail__content-footer {
-  margin-top: 22px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(148, 163, 184, 0.18);
-  justify-content: flex-end;
-}
-
-.post-detail__comment-title {
-  font-size: 24px;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.post-detail__comment-subtitle,
-.post-detail__comment-tip {
-  margin: 8px 0 0;
-  color: #64748b;
-  font-size: 14px;
-}
-
-.post-detail__comment-list {
-  display: grid;
-  gap: 14px;
-}
-
-.post-comment-card {
-  padding: 18px;
-  border-radius: 20px;
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-}
-
-.post-comment-card__meta {
-  margin-top: 6px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  color: #64748b;
-  font-size: 13px;
-}
-
-.post-comment-card__content {
-  margin-top: 14px;
-}
-
-.post-detail__comment-form {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-@media (max-width: 960px) {
-  .post-detail__hero-top,
-  .post-detail__title-row,
-  .post-comment-card__header,
-  .post-detail__comment-actions,
-  .post-detail__comment-header,
-  .post-detail__toolbar,
-  .post-detail__content-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .post-detail__toolbar :deep(.el-button),
-  .post-detail__content-footer :deep(.el-button) {
-    width: 100%;
-  }
-}
-</style>

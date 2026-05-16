@@ -46,6 +46,7 @@ export interface Post {
   comments_count: number
   is_top: boolean
   is_essence: boolean
+  is_liked?: boolean
   status: number
   created_at?: string
   updated_at?: string | null

@@ -1,354 +1,107 @@
 <template>
-  <div class="forum-home">
-    <el-card class="forum-home__hero">
-      <div class="forum-home__hero-top">
-        <div class="forum-home__hero-copy">
-          <div class="forum-home__eyebrow">Forum Hub</div>
-          <h1>论坛广场</h1>
-          <p>围绕竞赛、项目、组队与日常技术交流，快速找到你关心的话题和协作者。</p>
-        </div>
+  <div class="overflow-x-hidden pb-16 lg:pb-0">
+    <!-- Sort Tabs -->
+    <div class="px-4 py-3 md:px-0 flex items-center gap-2 border-b border-gray-100">
+      <button v-for="s in sorts" :key="s.value" @click="sort = s.value"
+        class="px-3 py-1 rounded-sm text-[13px] font-medium transition-all"
+        :class="sort === s.value ? 'bg-[#0064FF] text-white' : 'text-gray-500 hover:bg-gray-100'">
+        {{ s.label }}
+      </button>
+    </div>
 
-        <div class="forum-home__hero-actions">
-          <el-button type="primary" size="large" @click="router.push(auth.isVerified ? '/forum/create' : '/login')">
-            {{ auth.isVerified ? '发布帖子' : '登录参与' }}
-          </el-button>
-          <el-button plain size="large" @click="router.push('/news')">查看公告</el-button>
-          <el-button text size="large" @click="router.push('/forum')">进入论坛</el-button>
-        </div>
-      </div>
+    <!-- Loading -->
+    <div v-if="loading" class="text-center py-12 text-gray-400">
+      <i class="fas fa-spinner fa-spin text-2xl"></i>
+    </div>
 
-      <div class="forum-home__hero-stats">
-        <div class="forum-home__hero-stat">
-          <span>讨论板块</span>
-          <strong>{{ categories.length }}</strong>
-          <small>覆盖讨论、竞赛、项目招募与组队招募</small>
+    <!-- Post List -->
+    <div v-else-if="posts.length" class="space-y-2 md:space-y-4 p-4 md:p-0 md:py-4">
+      <div v-for="post in posts" :key="post.id" class="content-card p-4 md:p-5 shadow-sm">
+        <div class="flex items-center gap-2 mb-3">
+          <router-link :to="`/forum/category/${post.category_id}`" class="text-[10px] px-1.5 py-0.5 rounded-sm border"
+            :class="categoryColor(post)">
+            {{ categoryName(post) }}
+          </router-link>
+          <span v-if="post.is_top" class="text-[10px] px-1.5 py-0.5 rounded-sm bg-red-50 text-red-600 border border-red-100">置顶</span>
+          <span v-if="post.is_essence" class="text-[10px] px-1.5 py-0.5 rounded-sm bg-yellow-50 text-yellow-600 border border-yellow-100">精华</span>
+          <span class="text-[11px] text-gray-400 ml-auto">{{ timeAgo(post.created_at) }}</span>
         </div>
-        <div class="forum-home__hero-stat">
-          <span>动态帖子</span>
-          <strong>{{ posts.length }}</strong>
-          <small>支持按最新与最热自由切换浏览</small>
-        </div>
-      </div>
-    </el-card>
-
-    <el-card class="forum-home__boards-card">
-      <div class="forum-home__board-grid">
-        <RouterLink
-          v-for="item in categories"
-          :key="item.id"
-          :to="`/forum/category/${item.id}`"
-          class="forum-home__board-pill"
-        >
-          <span class="forum-home__board-name">{{ item.name }}</span>
-          <span class="forum-home__board-count">{{ item.posts_count }}</span>
-        </RouterLink>
-      </div>
-    </el-card>
-
-    <el-card class="forum-home__posts-card">
-      <template #header>
-        <div class="section-title forum-home__posts-head">
-          <div>
-            <span class="forum-home__posts-title">帖子流</span>
-            <p class="forum-home__posts-subtitle">预览展示正文渲染后的第一句话，便于快速判断内容主题。</p>
+        <router-link :to="`/forum/post/${post.id}`" class="block">
+          <h3 class="text-[15px] md:text-[17px] font-bold text-gray-900 leading-snug mb-2 hover:text-[#0064FF] transition-colors">{{ post.title }}</h3>
+        </router-link>
+        <div class="flex items-center gap-3 mt-3">
+          <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 font-bold text-[11px] border border-indigo-200 shrink-0">
+            {{ post.author?.username?.slice(0, 2).toUpperCase() || 'U' }}
           </div>
-          <el-segmented v-model="sort" :options="sortOptions" @change="loadPosts" />
+          <span class="text-[13px] font-medium text-gray-700">{{ post.author?.username }}</span>
+          <div class="ml-auto flex items-center gap-4 text-gray-400 text-[13px]">
+            <span class="flex items-center gap-1"><i class="far fa-thumbs-up"></i> {{ post.likes_count }}</span>
+            <span class="flex items-center gap-1"><i class="far fa-comment"></i> {{ post.comments_count }}</span>
+          </div>
         </div>
-      </template>
-
-      <el-empty v-if="!posts.length" description="暂无帖子" />
-      <div v-else class="forum-home__post-list">
-        <RouterLink v-for="item in posts" :key="item.id" :to="`/forum/post/${item.id}`" class="forum-home__post-card">
-          <div class="forum-home__post-top">
-            <div class="forum-home__post-badges">
-              <span v-if="item.is_top" class="forum-pill forum-pill--top">置顶</span>
-              <span v-if="item.is_essence" class="forum-pill forum-pill--essence">精华</span>
-              <span class="forum-home__post-type">{{ postTypeLabel(item.post_type) }}</span>
-            </div>
-            <RoleTag :user="item.author" />
-          </div>
-          <h3>{{ item.title }}</h3>
-          <p class="forum-home__post-excerpt">{{ getFirstSentence(item.content) }}</p>
-          <div class="forum-home__post-bottom">
-            <span>{{ item.author.username }}</span>
-            <span>点赞 {{ item.likes_count }}</span>
-            <span>评论 {{ item.comments_count }}</span>
-            <span>浏览 {{ item.views }}</span>
-          </div>
-        </RouterLink>
       </div>
-    </el-card>
+    </div>
 
-    <ForumBackTopButton />
+    <div v-else class="text-center py-12 text-gray-400">
+      <i class="fas fa-inbox text-4xl mb-3"></i>
+      <p>暂无帖子</p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { fetchPosts, fetchCategories } from '../../api/forum'
+import type { Post, Category } from '../../types/models'
 
-import ForumBackTopButton from '../../components/ForumBackTopButton.vue'
-import RoleTag from '../../components/RoleTag.vue'
-import { useAuthStore } from '../../stores/auth'
-import { useForumStore } from '../../stores/forum'
-import { getFirstSentence } from '../../utils/content'
-
-const router = useRouter()
-const store = useForumStore()
-const auth = useAuthStore()
-const sort = ref<'latest' | 'hot'>('latest')
-
-const categories = computed(() => store.categories)
-const posts = computed(() => store.posts)
-const sortOptions = [
+const posts = ref<Post[]>([])
+const categories = ref<Category[]>([])
+const loading = ref(true)
+const sort = ref('latest')
+const sorts = [
   { label: '最新', value: 'latest' },
-  { label: '最热', value: 'hot' },
+  { label: '热门', value: 'hot' },
+  { label: '精华', value: 'essence' },
 ]
 
-async function loadPosts() {
-  await store.loadPosts(sort.value)
+function timeAgo(date?: string) {
+  if (!date) return ''
+  const diff = Date.now() - new Date(date).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 60) return `${mins} 分钟前`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours} 小时前`
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `${days} 天前`
+  return new Date(date).toLocaleDateString()
 }
 
-function postTypeLabel(type: string) {
-  const map: Record<string, string> = {
-    general: '普通帖',
-    contest: '竞赛资讯',
-    recruit_project: '项目招募',
-    recruit_team: '组队招募',
-    notice: '公告帖',
+function categoryName(post: Post) {
+  return categories.value.find(c => c.id === post.category_id)?.name || '话题'
+}
+
+function categoryColor(post: Post) {
+  const type = categories.value.find(c => c.id === post.category_id)?.type || 'forum'
+  const s: Record<string, string> = {
+    forum: 'text-green-600 bg-green-50 border-green-100',
+    contest: 'text-orange-600 bg-orange-50 border-orange-100',
+    recruit_project: 'text-blue-600 bg-blue-50 border-blue-100',
+    recruit_team: 'text-purple-600 bg-purple-50 border-purple-100',
+    notice: 'text-red-600 bg-red-50 border-red-100',
   }
-  return map[type] || '帖子'
+  return s[type] || 'text-gray-600 bg-gray-50 border-gray-100'
 }
 
+async function load() {
+  loading.value = true
+  try {
+    posts.value = await fetchPosts(sort.value)
+  } catch { /* ignore */ } finally { loading.value = false }
+}
+
+watch(sort, load)
 onMounted(async () => {
-  await Promise.all([store.loadCategories(), loadPosts()])
+  try { categories.value = await fetchCategories() } catch { /* ignore */ }
+  load()
 })
 </script>
-
-<style scoped>
-.forum-home {
-  display: grid;
-  gap: 16px;
-}
-
-.forum-home__hero {
-  background:
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.18), transparent 26%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(241, 245, 249, 0.95));
-}
-
-.forum-home__hero-top,
-.forum-home__hero-actions,
-.forum-home__posts-head,
-.forum-home__post-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.forum-home__hero-copy {
-  max-width: 760px;
-}
-
-.forum-home__eyebrow {
-  display: inline-flex;
-  min-height: 32px;
-  align-items: center;
-  padding: 0 12px;
-  border-radius: 999px;
-  background: #eff6ff;
-  color: #2563eb;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.forum-home h1 {
-  margin: 16px 0 10px;
-  font-size: clamp(28px, 4vw, 42px);
-  line-height: 1.1;
-}
-
-.forum-home p,
-.forum-home__posts-subtitle,
-.forum-home__post-excerpt {
-  margin: 0;
-  color: #64748b;
-  line-height: 1.75;
-}
-
-.forum-home__hero-actions {
-  flex-direction: column;
-  min-width: 150px;
-}
-
-.forum-home__hero-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 20px;
-}
-
-.forum-home__hero-stat {
-  padding: 16px 18px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-.forum-home__hero-stat span,
-.forum-home__hero-stat small {
-  display: block;
-  color: #64748b;
-}
-
-.forum-home__hero-stat strong {
-  display: block;
-  margin: 8px 0;
-  font-size: 32px;
-  color: #0f172a;
-}
-
-.forum-home__boards-card {
-  padding: 0;
-}
-
-.forum-home__board-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.forum-home__board-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 44px;
-  padding: 0 14px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-  transition: all 0.2s ease;
-}
-
-.forum-home__board-pill:hover {
-  transform: translateY(-1px);
-  border-color: rgba(59, 130, 246, 0.26);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
-}
-
-.forum-home__board-name {
-  color: #0f172a;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.forum-home__board-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  padding: 0 8px;
-  border-radius: 999px;
-  background: #eff6ff;
-  color: #2563eb;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.forum-home__post-list {
-  display: grid;
-  gap: 14px;
-}
-
-.forum-home__post-card {
-  display: block;
-  padding: 18px;
-  border-radius: 20px;
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.forum-home__post-card:hover {
-  transform: translateY(-2px);
-  border-color: rgba(59, 130, 246, 0.26);
-  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.08);
-}
-
-.forum-home__post-badges,
-.forum-home__post-bottom {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-}
-
-.forum-home__post-type,
-.forum-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 28px;
-  padding: 0 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.forum-home__post-type {
-  background: #f1f5f9;
-  color: #475569;
-}
-
-.forum-pill--top {
-  background: #dbeafe;
-  color: #2563eb;
-}
-
-.forum-pill--essence {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.forum-home__posts-title {
-  font-size: 24px;
-  color: #0f172a;
-}
-
-.forum-home__post-card h3 {
-  margin: 14px 0 10px;
-  font-size: 22px;
-  color: #0f172a;
-}
-
-.forum-home__post-bottom {
-  margin-top: 14px;
-  color: #64748b;
-  font-size: 13px;
-}
-
-@media (max-width: 960px) {
-  .forum-home__hero-top,
-  .forum-home__hero-actions,
-  .forum-home__posts-head,
-  .forum-home__post-top {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .forum-home__hero-actions {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .forum-home__hero-actions :deep(.el-button) {
-    width: 100%;
-  }
-
-  .forum-home__hero-stats {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
