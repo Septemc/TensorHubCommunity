@@ -3,7 +3,7 @@
 > **域名**: community.tensorhub.cn  
 > **服务器 IP**: 159.65.97.63  
 > **前端路径**: /www/wwwroot/community.tensorhub.cn  
-> **后端路径**: /www/wwwroot/tensorhub_app  
+> **项目根目录**: /www/wwwroot/TensorHubCommunity（git clone）  
 
 ---
 
@@ -62,12 +62,17 @@
 4. PHP 版本选 **纯静态**
 5. 点击提交
 
-### 3.3 创建后端目录
+### 3.3 在服务器上克隆项目
 
 ```bash
 ssh root@159.65.97.63
-mkdir -p /www/wwwroot/tensorhub_app/uploads
-chmod 777 /www/wwwroot/tensorhub_app/uploads
+cd /www/wwwroot
+git clone https://github.com/Septemc/TensorHubCommunity.git
+cd TensorHubCommunity
+
+# 创建上传目录
+mkdir -p uploads
+chmod 777 uploads
 ```
 
 ---
@@ -75,8 +80,8 @@ chmod 777 /www/wwwroot/tensorhub_app/uploads
 ## 4. 快速部署
 
 ```bash
-# 克隆项目
-git clone git@github.com:Septemc/TensorHubCommunity.git
+# 克隆项目到本地（如果还没克隆）
+git clone https://github.com/Septemc/TensorHubCommunity.git
 cd TensorHubCommunity
 
 # 给部署脚本添加执行权限
@@ -116,33 +121,24 @@ systemctl enable docker && systemctl start docker
 # 安装 Docker Compose 插件
 apt-get install -y docker-compose-plugin
 
-# 创建目录
-mkdir -p /www/wwwroot/tensorhub_app/uploads
-mkdir -p /www/wwwroot/community.tensorhub.cn
-chmod 777 /www/wwwroot/tensorhub_app/uploads
+# 克隆项目
+cd /www/wwwroot
+git clone https://github.com/Septemc/TensorHubCommunity.git
+cd TensorHubCommunity
+
+# 创建上传目录
+mkdir -p uploads
+chmod 777 uploads
 
 exit
 ```
 
-### 5.2 同步项目文件
-
-```bash
-rsync -avz --delete \
-  --exclude='.git' \
-  --exclude='node_modules' \
-  --exclude='__pycache__' \
-  --exclude='.env' \
-  --exclude='dist/' \
-  --exclude='*.pyc' \
-  ./ root@159.65.97.63:/www/wwwroot/tensorhub_app/
-```
-
-### 5.3 配置环境变量
+### 5.2 配置环境变量
 
 ```bash
 ssh root@159.65.97.63
 
-cd /www/wwwroot/tensorhub_app
+cd /www/wwwroot/TensorHubCommunity
 cp .env.baota.example .env
 nano .env
 ```
@@ -158,23 +154,23 @@ nano .env
 | `TENSORHUB_COOKIE_SECURE` | Cookie 安全标志 | 必须设为 `true` |
 | `TENSORHUB_COOKIE_DOMAIN` | Cookie 域名 | `community.tensorhub.cn` |
 
-### 5.4 构建前端
+### 5.3 构建前端
 
 ```bash
 cd frontend
 npm install
-VITE_API_BASE_URL="/api" npm run build
+npm run build
 
 # 同步到服务器站点目录
 rsync -avz --delete dist/ root@159.65.97.63:/www/wwwroot/community.tensorhub.cn/
 ```
 
-### 5.5 启动后端
+### 5.4 启动后端
 
 ```bash
 ssh root@159.65.97.63
 
-cd /www/wwwroot/tensorhub_app
+cd /www/wwwroot/TensorHubCommunity
 
 # 构建并启动
 docker compose -f docker-compose.baota.yml up -d --build
@@ -190,21 +186,20 @@ docker compose -f docker-compose.baota.yml ps
 
 ## 6. 宝塔 Nginx 配置
 
-### 6.1 方法一：通过宝塔面板修改
+### 6.1 方法一：通过宝塔面板修改（推荐）
 
 1. 宝塔面板 → **网站** → 点击站点名 `community.tensorhub.cn`
 2. 点击 **配置文件**
-3. 删除全部内容，替换为项目中的 `deploy/nginx/baota_default.conf` 内容
+3. 删除全部内容，替换为项目中 `deploy/nginx/baota_default.conf` 的内容
 4. 点击 **保存**
 5. 重启 Nginx
 
 ### 6.2 方法二：直接复制配置文件
 
 ```bash
-scp deploy/nginx/baota_default.conf root@159.65.97.63:/www/server/panel/vhost/nginx/community.tensorhub.cn.conf
-
-# 在服务器上重启 Nginx
-ssh root@159.65.97.63 "nginx -t && nginx -s reload"
+# 在服务器上
+scp /www/wwwroot/TensorHubCommunity/deploy/nginx/baota_default.conf /www/server/panel/vhost/nginx/community.tensorhub.cn.conf
+nginx -t && nginx -s reload
 ```
 
 ### 6.3 配置要点说明
@@ -214,11 +209,42 @@ ssh root@159.65.97.63 "nginx -t && nginx -s reload"
 | 配置项 | 说明 |
 |--------|------|
 | `location /api/` | 反向代理到后端 `http://127.0.0.1:8000` |
-| `location /uploads/` | 映射到 `/www/wwwroot/tensorhub_app/uploads/` |
+| `location /uploads/` | 映射到 `/www/wwwroot/TensorHubCommunity/uploads/` |
 | `location /` | SPA 回退，所有前端路由返回 `index.html` |
 | `location /assets/` | 静态资源长缓存 |
-| HTTP→HTTPS | 自动 301 重定向 |
-| SSL | TLS 1.2/1.3，HSTS |
+| HTTP→HTTPS | 由宝塔面板管理（申请SSL后自动添加） |
+
+### 6.4 ⚠️ SSL 证书配置后的重要提醒
+
+在宝塔面板申请 SSL 证书后，会自动在配置文件中生成 443 端口的 server 块。**你必须确保 443 server 块中也包含以下 location 配置**：
+
+```nginx
+# 在 443 server 块中添加：
+location /api/ {
+    proxy_pass http://127.0.0.1:8000/api/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 120s;
+    proxy_connect_timeout 10s;
+}
+
+location /uploads/ {
+    alias /www/wwwroot/TensorHubCommunity/uploads/;
+    expires 7d;
+    add_header Cache-Control "public, immutable";
+}
+
+location /assets/ {
+    expires 1y;
+    add_header Cache-Control "public, immutable";
+}
+
+location / {
+    try_files $uri $uri/ /index.html;
+}
+```
 
 ---
 
@@ -244,21 +270,36 @@ ssh root@159.65.97.63 "nginx -t && nginx -s reload"
 ```bash
 ./deploy/deploy.baota.sh full        # 完整首次部署
 ./deploy/deploy.baota.sh deploy      # 代码更新后重新部署
-./deploy/deploy.baota.sh build-fe     # 仅构建前端并同步
-./deploy/deploy.baota.sh start        # 启动后端服务
-./deploy/deploy.baota.sh stop         # 停止后端服务
-./deploy/deploy.baota.sh restart      # 重启后端服务
-./deploy/deploy.baota.sh logs         # 查看后端日志
-./deploy/deploy.baota.sh status        # 查看服务状态
-./deploy/deploy.baota.sh db-backup     # 备份数据库
-./deploy/deploy.baota.sh nginx         # 显示 Nginx 配置指引
+./deploy/deploy.baota.sh build-fe    # 仅构建前端并同步
+./deploy/deploy.baota.sh start       # 启动后端服务
+./deploy/deploy.baota.sh stop        # 停止后端服务
+./deploy/deploy.baota.sh restart     # 重启后端服务
+./deploy/deploy.baota.sh logs        # 查看后端日志
+./deploy/deploy.baota.sh status      # 查看服务状态
+./deploy/deploy.baota.sh db-backup   # 备份数据库
+./deploy/deploy.baota.sh nginx       # 显示 Nginx 配置指引
 ```
 
 ### 8.2 更新部署（代码变更后）
 
+在服务器上拉取最新代码，然后重新部署：
 ```bash
+ssh root@159.65.97.63
+cd /www/wwwroot/TensorHubCommunity
 git pull
-./deploy/deploy.baota.sh deploy
+
+# 重新构建并启动后端
+docker compose -f docker-compose.baota.yml up -d --build
+docker compose -f docker-compose.baota.yml exec backend alembic upgrade head
+```
+
+前端也需要重新构建：
+```bash
+# 在本地
+cd frontend
+npm install
+npm run build
+rsync -avz --delete dist/ root@159.65.97.63:/www/wwwroot/community.tensorhub.cn/
 ```
 
 ### 8.3 仅更新前端
@@ -273,7 +314,7 @@ rsync -avz --delete dist/ root@159.65.97.63:/www/wwwroot/community.tensorhub.cn/
 
 ```bash
 ssh root@159.65.97.63
-cd /www/wwwroot/tensorhub_app
+cd /www/wwwroot/TensorHubCommunity
 
 # 实时日志
 docker compose -f docker-compose.baota.yml logs -f backend
@@ -286,7 +327,7 @@ docker compose -f docker-compose.baota.yml logs --tail=100 backend
 
 ```bash
 ssh root@159.65.97.63
-cd /www/wwwroot/tensorhub_app
+cd /www/wwwroot/TensorHubCommunity
 
 # 创建备份
 docker compose -f docker-compose.baota.yml exec db \
@@ -309,7 +350,7 @@ alembic revision --autogenerate -m "描述"
 
 # 在服务器上执行迁移
 ssh root@159.65.97.63
-cd /www/wwwroot/tensorhub_app
+cd /www/wwwroot/TensorHubCommunity
 docker compose -f docker-compose.baota.yml exec backend alembic upgrade head
 ```
 
@@ -320,9 +361,11 @@ docker compose -f docker-compose.baota.yml exec backend alembic upgrade head
 ### Q: 网站无法访问
 
 ```bash
-# 检查后端服务
 ssh root@159.65.97.63
-docker compose -f /www/wwwroot/tensorhub_app/docker-compose.baota.yml ps
+
+# 检查后端服务
+cd /www/wwwroot/TensorHubCommunity
+docker compose -f docker-compose.baota.yml ps
 
 # 检查 Nginx 配置
 nginx -t
@@ -344,8 +387,26 @@ ss -tlnp | grep -E '80|443|8000'
 
 ### Q: 上传文件 404
 
-- 确认 `/www/wwwroot/tensorhub_app/uploads/` 目录存在且有权限
+- 确认 `/www/wwwroot/TensorHubCommunity/uploads/` 目录存在且有权限
 - 确认 Nginx 配置中 `/uploads/` 路径正确映射
+
+### Q: 端口 8000 被占用
+
+如果出现 `Bind for 0.0.0.0:8000 failed: port is already allocated` 错误：
+
+```bash
+# 方法1：停止旧版 docker-compose 服务
+cd /www/wwwroot/TensorHubCommunity
+docker compose down          # 停止原始 docker-compose.yml 的服务
+docker compose -f docker-compose.baota.yml down  # 停止 baota 版服务
+
+# 方法2：查找并杀死占用端口的进程
+ss -tlnp | grep :8000
+kill <PID>
+
+# 然后重新启动
+docker compose -f docker-compose.baota.yml up -d
+```
 
 ### Q: 数据库连接失败
 
@@ -358,10 +419,14 @@ ss -tlnp | grep -E '80|443|8000'
 
 ```
 Internet → 宝塔 Nginx (80/443)
-              ├── /            → /www/wwwroot/community.tensorhub.cn (Vue SPA)
+              ├── /            → /www/wwwroot/community.tensorhub.cn (Vue SPA 前端)
               ├── /assets/      → 静态资源（长缓存）
-              ├── /uploads/     → /www/wwwroot/tensorhub_app/uploads/
+              ├── /uploads/     → /www/wwwroot/TensorHubCommunity/uploads/
               └── /api/        → http://127.0.0.1:8000 (Docker 后端)
+
+服务器文件布局:
+  /www/wwwroot/TensorHubCommunity/       ← git clone 项目（后端代码 + Docker 配置）
+  /www/wwwroot/community.tensorhub.cn/  ← 前端构建产物（npm run build 输出）
 
 Docker Network:
   backend:8000 → db:5432 (PostgreSQL)

@@ -3,14 +3,14 @@
 # TensorHub Community - 宝塔面板部署脚本
 # 域名: community.tensorhub.cn
 # 前端: /www/wwwroot/community.tensorhub.cn
-# 后端: /www/wwwroot/tensorhub_app (Docker)
+# 后端: /www/wwwroot/TensorHubCommunity (Docker)
 # ============================================
 
 set -euo pipefail
 
 # ---- 配置 ----
 SERVER="root@159.65.97.63"
-REMOTE_DIR="/www/wwwroot/tensorhub_app"
+REMOTE_DIR="/www/wwwroot/TensorHubCommunity"
 FRONTEND_DIR="/www/wwwroot/community.tensorhub.cn"
 DOMAIN="community.tensorhub.cn"
 
@@ -70,11 +70,11 @@ fi
 
 # 创建目录
 echo "[REMOTE] 创建目录..."
-mkdir -p /www/wwwroot/tensorhub_app/uploads
+mkdir -p /www/wwwroot/TensorHubCommunity/uploads
 mkdir -p /www/wwwroot/community.tensorhub.cn
 
 # 设置上传目录权限
-chmod 777 /www/wwwroot/tensorhub_app/uploads
+chmod 777 /www/wwwroot/TensorHubCommunity/uploads
 
 REMOTE_SCRIPT
     info "服务器初始化完成"
@@ -135,7 +135,7 @@ build_frontend() {
     info "本地构建前端..."
     cd frontend
     npm install
-    VITE_API_BASE_URL="/api" npm run build
+    npm run build
     cd ..
 
     info "同步前端构建产物到服务器..."
@@ -149,6 +149,27 @@ start_backend() {
     info "构建并启动后端服务..."
     ssh "$SERVER" bash -s <<REMOTE_SCRIPT
 cd "${REMOTE_DIR}"
+
+# 停止可能占用端口的旧容器（原始 docker-compose.yml 的服务）
+if [ -f docker-compose.yml ]; then
+    echo "[REMOTE] 停止旧版 docker-compose 服务..."
+    docker compose down 2>/dev/null || true
+fi
+
+# 也停止 baota 版本的旧容器
+docker compose -f docker-compose.baota.yml down 2>/dev/null || true
+
+# 检查并杀死占用 8000 端口的进程
+PORT_USER=\$(ss -tlnp | grep ':8000' | head -1)
+if [ -n "\$PORT_USER" ]; then
+    echo "[REMOTE] 端口 8000 被占用，正在释放..."
+    echo "\$PORT_USER"
+    PID=\$(echo "\$PORT_USER" | grep -oP 'pid=\K\d+' || echo "")
+    if [ -n "\$PID" ]; then
+        kill "\$PID" 2>/dev/null || true
+        sleep 2
+    fi
+fi
 
 # 构建后端镜像
 docker compose -f docker-compose.baota.yml build

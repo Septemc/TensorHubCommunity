@@ -36,8 +36,8 @@ services:
       - "127.0.0.1:8000:8000"
     volumes:
       - uploads:/app/uploads
-      # 映射上传目录到宝塔站点目录，方便 Nginx 直接提供静态文件
-      - /www/wwwroot/tensorhub_app/uploads:/app/uploads
+      # 映射上传目录到项目目录，方便 Nginx 直接提供静态文件
+      - /www/wwwroot/TensorHubCommunity/uploads:/app/uploads
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
