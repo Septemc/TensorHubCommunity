@@ -177,12 +177,9 @@ docker compose -f docker-compose.baota.yml build
 # 启动服务
 docker compose -f docker-compose.baota.yml up -d
 
-# 等待数据库就绪
-echo "[REMOTE] 等待数据库启动..."
-sleep 5
-
-# 运行数据库迁移
-docker compose -f docker-compose.baota.yml exec backend alembic upgrade head
+# 等待数据库就绪（Alembic迁移已在容器启动时自动执行）
+echo "[REMOTE] 等待数据库和后端服务就绪..."
+sleep 10
 
 # 查看状态
 docker compose -f docker-compose.baota.yml ps
@@ -245,7 +242,8 @@ deploy() {
 cd "${REMOTE_DIR}"
 docker compose -f docker-compose.baota.yml build backend
 docker compose -f docker-compose.baota.yml up -d backend
-docker compose -f docker-compose.baota.yml exec backend alembic upgrade head
+# 数据库迁移已在容器 entrypoint 中自动执行
+sleep 10
 docker compose -f docker-compose.baota.yml ps
 REMOTE_SCRIPT
     rsync -avz --delete frontend/dist/ "${SERVER}:${FRONTEND_DIR}/"

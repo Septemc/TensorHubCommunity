@@ -2,8 +2,7 @@ from sqlalchemy import select
 
 from app.core.config import get_settings
 from app.core.security import hash_password
-from app.db.base import Base
-from app.db.session import engine, async_session_maker
+from app.db.session import async_session_maker
 from app.models import Category, Role, SitePage, User
 
 
@@ -32,8 +31,6 @@ DEFAULT_PAGES = [
 
 async def bootstrap_data() -> None:
     settings = get_settings()
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
     async with async_session_maker() as session:
         for role_data in ROLE_SEEDS:

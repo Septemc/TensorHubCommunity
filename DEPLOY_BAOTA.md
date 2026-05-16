@@ -175,8 +175,9 @@ cd /www/wwwroot/TensorHubCommunity
 # 构建并启动
 docker compose -f docker-compose.baota.yml up -d --build
 
-# 运行数据库迁移
-docker compose -f docker-compose.baota.yml exec backend alembic upgrade head
+# 数据库迁移已在容器启动时自动执行
+# 如需手动运行迁移，可执行：
+# docker compose -f docker-compose.baota.yml exec backend alembic upgrade head
 
 # 查看状态
 docker compose -f docker-compose.baota.yml ps
@@ -288,10 +289,8 @@ ssh root@159.65.97.63
 cd /www/wwwroot/TensorHubCommunity
 git pull
 
-# 重新构建并启动后端
+# 重新构建并启动后端（数据库迁移在容器启动时自动执行）
 docker compose -f docker-compose.baota.yml up -d --build
-sleep 15
-docker compose -f docker-compose.baota.yml exec backend alembic upgrade head
 ```
 
 前端也需要重新构建：
