@@ -290,6 +290,7 @@ git pull
 
 # 重新构建并启动后端
 docker compose -f docker-compose.baota.yml up -d --build
+sleep 15
 docker compose -f docker-compose.baota.yml exec backend alembic upgrade head
 ```
 

@@ -9,7 +9,10 @@ from app.models import *  # noqa: F401,F403
 
 config = context.config
 settings = get_settings()
-config.set_main_option('sqlalchemy.url', settings.database_url)
+
+# Alembic runs synchronously, so replace asyncpg with psycopg2
+sync_url = settings.database_url.replace("+asyncpg", "+psycopg2")
+config.set_main_option('sqlalchemy.url', sync_url)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
@@ -18,7 +21,7 @@ target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
-    context.configure(url=settings.database_url, target_metadata=target_metadata, literal_binds=True)
+    context.configure(url=sync_url, target_metadata=target_metadata, literal_binds=True)
     with context.begin_transaction():
         context.run_migrations()
 
